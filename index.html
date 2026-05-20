@@ -224,6 +224,27 @@ tr.drag-over { border-top: 2px solid #2563EB; }
 .tn-input:focus { border-color: #2563EB; background: #fff; box-shadow: 0 0 0 2px rgba(37,99,235,0.1); }
 .tn-changed { border-color: #FBBF24 !important; background: #FFFBEB !important; }
 
+/* ── Sub Plan components ── */
+.sp-cascade-label { display:flex; align-items:center; gap:8px; cursor:pointer; font-size:13px; color:#374151; user-select:none; }
+.sp-cascade-check { width:16px; height:16px; border:2px solid #D1D5DB; border-radius:3px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10px; color:#fff; transition:all .15s; }
+.sp-cascade-check.on { background:#2563EB; border-color:#2563EB; }
+.sp-cascade-check.on::after { content:'✓'; }
+.sp-adj-toggle { display:flex; background:#F3F4F6; border-radius:6px; padding:2px; gap:2px; }
+.sp-adj-btn { padding:3px 10px; border-radius:4px; font-size:11px; font-weight:600; cursor:pointer; border:none; background:transparent; color:#6B7280; transition:all .15s; }
+.sp-adj-btn.active { background:#fff; color:#2563EB; box-shadow:0 1px 3px rgba(0,0,0,.1); }
+.sp-delay-input { width:64px; border:1px solid #D1D5DB; border-radius:5px; padding:5px 8px; font-size:13px; text-align:center; outline:none; }
+.sp-delay-input:focus { border-color:#2563EB; }
+.sp-delay-input.changed { border-color:#F59E0B; background:#FFFBEB; }
+.sp-date-input { border:1px solid #D1D5DB; border-radius:5px; padding:5px 8px; font-size:12px; outline:none; width:130px; }
+.sp-date-input:focus { border-color:#2563EB; }
+.sp-new-date { font-size:12px; font-weight:600; }
+.sp-new-date.changed { color:#D97706; }
+.sp-new-date.unchanged { color:#9CA3AF; }
+.sp-preview-row { display:flex; align-items:center; gap:0; padding:8px 0; border-bottom:1px solid #F3F4F6; }
+.sp-preview-row:last-child { border-bottom:none; }
+.sp-preview-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; margin-right:10px; }
+.sp-preview-line { width:2px; background:#E5E7EB; margin-left:4px; height:20px; margin-right:16px; margin-top:2px; }
+
 /* ── Ops Flow selector cards ── */
 .ops-flow-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .ops-flow-card { border: 2px solid #E5E7EB; border-radius: 10px; padding: 16px; cursor: pointer; transition: all 0.15s; }
@@ -1711,24 +1732,79 @@ tr.drag-over { border-top: 2px solid #2563EB; }
 
       <!-- Tab: Management Plan -->
       <div class="view-scroll" id="vt-plan" style="display:none;">
+        <!-- Main Plan card -->
         <div class="view-section">
-          <div class="view-section-hd"><span class="view-section-title">ABS Plan</span><button class="btn-outline-sm" style="padding:6px 14px;font-size:12px;" onclick="switchFlow('create')">Edit</button></div>
+          <div class="view-section-hd">
+            <span class="view-section-title">Main Plan</span>
+            <div style="display:flex;gap:8px;">
+              <button class="btn-outline-sm" style="padding:6px 14px;font-size:12px;" onclick="switchFlow('create')">Edit</button>
+            </div>
+          </div>
           <div class="view-section-body">
             <div class="view-grid">
-              <div class="view-field"><span class="view-label">Flow Template</span><span class="view-value">TH_SPL_ABS_Standard_Monthly</span></div>
-              <div class="view-field"><span class="view-label">Cycle Frequency</span><span class="view-value">Every 4 weeks</span></div>
-              <div class="view-field"><span class="view-label">Plan Name</span><span class="view-value">TH_SPL_Starlight_2025_Plan</span></div>
-              <div class="view-field"><span class="view-label">Plan Start Date</span><span class="view-value" style="color:#9CA3AF;">Not set (defaults to 1st of month)</span></div>
-              <div class="view-field"><span class="view-label">Plan End Date</span><span class="view-value" style="color:#9CA3AF;">Not set</span></div>
+              <div class="view-field"><span class="view-label">Ops Flow</span><span class="view-value">ABS (Non-Net)</span></div>
+              <div class="view-field"><span class="view-label">Cycle Length</span><span class="view-value">Every 4 weeks · Calendar Days</span></div>
+              <div class="view-field"><span class="view-label">Plan Name</span><span class="view-value">TH_SPL_Starlight_ABS_T1_2026</span></div>
+              <div class="view-field"><span class="view-label">Close Date</span><span class="view-value" style="color:#9CA3AF;">Not set</span></div>
+              <div class="view-field"><span class="view-label">Status</span><span class="view-value"><span class="badge badge-pending">Pending TC Approval</span></span></div>
+            </div>
+            <!-- milestone summary -->
+            <div style="margin-top:16px;padding-top:14px;border-top:1px solid #F3F4F6;">
+              <div style="font-size:11px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">Milestone Offsets (7 milestones)</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                <span class="cal-chip" style="background:#DBEAFE;color:#1D4ED8;">Servicer Report +0d</span>
+                <span class="cal-chip" style="background:#EDE9FE;color:#6D28D9;">Batch Creation +1d</span>
+                <span class="cal-chip" style="background:#FEF3C7;color:#92400E;">Sale Notice +2d</span>
+                <span class="cal-chip" style="background:#F3F4F6;color:#6B7280;">Sys Cutoff +3d</span>
+                <span class="cal-chip" style="background:#D1FAE5;color:#065F46;">Sale Date +4d</span>
+                <span class="cal-chip" style="background:#F3F4F6;color:#6B7280;">Sys Selling +5d</span>
+                <span class="cal-chip" style="background:#CCFBF1;color:#0F766E;">Collection +7d</span>
+              </div>
             </div>
           </div>
         </div>
+
+        <!-- Sub Plans section -->
+        <div class="view-section">
+          <div class="view-section-hd">
+            <span class="view-section-title">Sub Plans <span style="font-size:12px;font-weight:400;color:#9CA3AF;margin-left:6px;">2 active</span></span>
+            <button class="btn-primary-lg" style="font-size:12px;padding:7px 16px;" onclick="switchFlow('sub-plan')">+ Create Sub Plan</button>
+          </div>
+          <div style="padding:0;">
+            <table style="width:100%;border-collapse:collapse;">
+              <thead><tr>
+                <th style="padding:10px 16px;font-size:11px;font-weight:600;color:#6B7280;background:#F9FAFB;border-bottom:1px solid #E5E7EB;">Sub Plan ID</th>
+                <th style="padding:10px 16px;font-size:11px;font-weight:600;color:#6B7280;background:#F9FAFB;border-bottom:1px solid #E5E7EB;">Affected Cycles</th>
+                <th style="padding:10px 16px;font-size:11px;font-weight:600;color:#6B7280;background:#F9FAFB;border-bottom:1px solid #E5E7EB;">Reason</th>
+                <th style="padding:10px 16px;font-size:11px;font-weight:600;color:#6B7280;background:#F9FAFB;border-bottom:1px solid #E5E7EB;">Status</th>
+                <th style="padding:10px 16px;font-size:11px;font-weight:600;color:#6B7280;background:#F9FAFB;border-bottom:1px solid #E5E7EB;">Created At</th>
+                <th style="padding:10px 16px;font-size:11px;font-weight:600;color:#6B7280;background:#F9FAFB;border-bottom:1px solid #E5E7EB;">Action</th>
+              </tr></thead>
+              <tbody>
+                <tr style="border-bottom:1px solid #F3F4F6;">
+                  <td style="padding:12px 16px;font-size:13px;color:#2563EB;cursor:pointer;">SP-2026-017</td>
+                  <td style="padding:12px 16px;font-size:13px;">Cycle #17 · Apr 21 – May 18</td>
+                  <td style="padding:12px 16px;font-size:13px;color:#374151;">Bank holiday delay TH</td>
+                  <td style="padding:12px 16px;"><span class="badge badge-active" style="background:#DCFCE7;color:#16A34A;">Approved</span></td>
+                  <td style="padding:12px 16px;font-size:12px;color:#9CA3AF;">2026-04-18 10:22</td>
+                  <td style="padding:12px 16px;"><div class="tbl-actions"><button class="tbl-act-link">View</button></div></td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 16px;font-size:13px;color:#2563EB;cursor:pointer;">SP-2026-018</td>
+                  <td style="padding:12px 16px;font-size:13px;">Cycle #18 · May 19 – Jun 15</td>
+                  <td style="padding:12px 16px;font-size:13px;color:#374151;">System maintenance window</td>
+                  <td style="padding:12px 16px;"><span class="badge badge-pending">Pending TC</span></td>
+                  <td style="padding:12px 16px;font-size:12px;color:#9CA3AF;">2026-05-15 14:07</td>
+                  <td style="padding:12px 16px;"><div class="tbl-actions"><button class="tbl-act-link">View</button><span class="tbl-act-sep">|</span><button class="tbl-act-link danger" style="color:#DC2626;">Withdraw</button></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <div class="view-footer">
           <button class="btn-outline-sm" style="padding:9px 20px;font-size:13px;" onclick="switchFlow('list')">← Back to Lender List</button>
-          <div style="display:flex;gap:10px;">
-            <button class="btn-outline-sm" style="padding:9px 20px;font-size:13px;">Cancel</button>
-            <button class="btn-primary-lg" style="font-size:13px;padding:9px 20px;" onclick="switchViewTab('vt-report',document.querySelectorAll('.view-tab')[3])">Next →</button>
-          </div>
+          <button class="btn-primary-lg" style="font-size:13px;padding:9px 20px;" onclick="switchViewTab('vt-report',document.querySelectorAll('.view-tab')[3])">Next →</button>
         </div>
       </div>
 
@@ -1815,6 +1891,131 @@ tr.drag-over { border-top: 2px solid #2563EB; }
   </div><!-- /app-layout -->
 </div><!-- /flow-view -->
 
+<!-- ══ Flow: Sub Plan ══ -->
+<div id="flow-sub-plan" class="flow">
+  <div class="app-layout">
+    <!-- Sidebar (same as view) -->
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">M</div>
+        <div><div class="sidebar-logo-text">Monee</div><div class="sidebar-logo-sub">Funding Admin</div></div>
+      </div>
+      <div class="sidebar-nav">
+        <div class="sidebar-group-hd">Operations</div>
+        <div class="sidebar-item">Funder List</div>
+        <div class="sidebar-item active">Lender Management</div>
+        <div class="sidebar-item">Ticket Center</div>
+        <div class="sidebar-group-hd" style="margin-top:8px;">Reports</div>
+        <div class="sidebar-item">ABS Calendar</div>
+        <div class="sidebar-item">Report Management</div>
+      </div>
+    </div>
+
+    <div class="sidebar-main">
+      <!-- Top nav -->
+      <div class="list-topnav">
+        <div class="list-topnav-crumb">
+          <a href="#" onclick="switchFlow('list');return false;">Lender List</a>
+          <span class="sep">/</span>
+          <a href="#" onclick="switchFlow('view');return false;">TH_SPL_Starlight_ABS_01</a>
+          <span class="sep">/</span>
+          <span class="current">Create Sub Plan</span>
+        </div>
+        <div class="list-topnav-right">TH Region · Zikky</div>
+      </div>
+
+      <div class="view-scroll" style="padding:24px 28px 80px;">
+
+        <!-- Page header -->
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;">
+          <div>
+            <div style="font-size:18px;font-weight:700;color:#111827;margin-bottom:4px;">Create Sub Plan</div>
+            <div style="font-size:13px;color:#6B7280;">TH_SPL_Starlight_ABS_01 &nbsp;·&nbsp; Main Plan: TH_SPL_Starlight_ABS_T1_2026 &nbsp;·&nbsp; ABS (Non-Net) · 4 weeks</div>
+          </div>
+          <span class="badge badge-pending" style="margin-top:4px;">Pending TC Sign-off after Submit</span>
+        </div>
+
+        <!-- Section 1: Affected Cycles -->
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">Affected Cycles</div>
+            <div class="section-sub">Select which cycles this sub plan will override. Main plan resumes automatically after the last selected cycle.</div>
+          </div>
+          <div class="section-body">
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Cycle(s) <span class="req">*</span></label>
+                <select class="form-select" id="sp-cycle-select" onchange="onSpCycleChange(this)" style="width:100%;">
+                  <option value="">— Select cycle —</option>
+                  <option value="18" selected>Cycle #18 · May 19 – Jun 15 (Current)</option>
+                  <option value="19">Cycle #19 · Jun 16 – Jul 13</option>
+                  <option value="20">Cycle #20 · Jul 14 – Aug 10</option>
+                  <option value="21">Cycle #21 · Aug 11 – Sep 7</option>
+                </select>
+                <div class="form-hint">Showing next 4 upcoming cycles. Sub plan expires after the selected cycle ends.</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Reason <span class="req">*</span></label>
+                <input class="form-input" id="sp-reason" placeholder="e.g. Bank holiday, system maintenance…" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Milestone Adjustments -->
+        <div class="section-card">
+          <div class="section-header" style="display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <div class="section-title">Milestone Adjustments</div>
+              <div class="section-sub">Adjust specific milestones for the selected cycle. Leave blank to keep the original schedule.</div>
+            </div>
+            <label class="sp-cascade-label" id="cascade-label">
+              <div class="sp-cascade-check" id="cascade-chk" onclick="toggleCascade()"></div>
+              <span>Auto-cascade subsequent milestones</span>
+            </label>
+          </div>
+          <div class="section-body" style="padding:0;">
+            <table style="width:100%;border-collapse:collapse;">
+              <thead>
+                <tr>
+                  <th style="padding:10px 16px;font-size:11px;font-weight:600;color:#6B7280;background:#F9FAFB;border-bottom:1px solid #E5E7EB;width:40px;">#</th>
+                  <th style="padding:10px 16px;font-size:11px;font-weight:600;color:#6B7280;background:#F9FAFB;border-bottom:1px solid #E5E7EB;">Milestone</th>
+                  <th style="padding:10px 16px;font-size:11px;font-weight:600;color:#6B7280;background:#F9FAFB;border-bottom:1px solid #E5E7EB;width:100px;">Type</th>
+                  <th style="padding:10px 16px;font-size:11px;font-weight:600;color:#6B7280;background:#F9FAFB;border-bottom:1px solid #E5E7EB;width:130px;">Original Date</th>
+                  <th style="padding:10px 16px;font-size:11px;font-weight:600;color:#6B7280;background:#F9FAFB;border-bottom:1px solid #E5E7EB;width:80px;">Mode</th>
+                  <th style="padding:10px 16px;font-size:11px;font-weight:600;color:#6B7280;background:#F9FAFB;border-bottom:1px solid #E5E7EB;width:220px;">Adjustment</th>
+                  <th style="padding:10px 16px;font-size:11px;font-weight:600;color:#6B7280;background:#F9FAFB;border-bottom:1px solid #E5E7EB;width:130px;">New Date</th>
+                </tr>
+              </thead>
+              <tbody id="sp-milestone-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Section 3: Preview timeline -->
+        <div class="section-card" id="sp-preview-card">
+          <div class="section-header">
+            <div class="section-title">Preview — Cycle #18</div>
+            <div class="section-sub">Orange = adjusted &nbsp;·&nbsp; Blue = original (unchanged)</div>
+          </div>
+          <div class="section-body" id="sp-preview-body">
+            <!-- rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer-nav" style="padding-top:20px;">
+          <button class="btn-outline-sm" style="padding:10px 20px;font-size:13px;" onclick="switchFlow('view')">← Back to Plan</button>
+          <div style="display:flex;gap:10px;">
+            <button class="btn-outline-sm" style="padding:10px 20px;font-size:13px;">Save Draft</button>
+            <button class="btn-primary-lg" onclick="submitSubPlan()">Submit to Ticket Center →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /flow-sub-plan -->
+
 <script>
 /* ── Compact radio & checkbox helpers ── */
 function selectRadioOpt(groupId, el) {
@@ -1835,14 +2036,174 @@ function toggleCheckbox(el) {
 }
 
 /* ── Flow switching ── */
+/* ══ Sub Plan logic ══ */
+const SP_CYCLE_STARTS = { 18:'2026-05-19', 19:'2026-06-16', 20:'2026-07-14', 21:'2026-08-11' };
+let spCascadeOn = false;
+let spModes = []; // 'delay' | 'date' per milestone row
+
+function initSubPlan() {
+  spCascadeOn = false;
+  document.getElementById('cascade-chk').classList.remove('on');
+  renderSpMilestoneTable(18);
+}
+
+function onSpCycleChange(sel) {
+  const cycleNum = parseInt(sel.value) || 18;
+  renderSpMilestoneTable(cycleNum);
+}
+
+function renderSpMilestoneTable(cycleNum) {
+  const cycleStart = new Date((SP_CYCLE_STARTS[cycleNum] || '2026-05-19') + 'T00:00:00');
+  const milestones = OPS_FLOW_MILESTONES['abs'];
+  spModes = milestones.map(() => 'delay');
+
+  const tbody = document.getElementById('sp-milestone-tbody');
+  tbody.innerHTML = milestones.map((m, i) => {
+    const origDate = new Date(cycleStart);
+    origDate.setDate(origDate.getDate() + m.offset);
+    const origStr = origDate.toISOString().slice(0,10);
+    const isSystem = m.type === 'system';
+    const rowBg = isSystem ? 'background:#F9FAFB;' : '';
+    const typeBadge = isSystem
+      ? `<span class="ms-type-tag ms-type-system">System</span>`
+      : `<span class="ms-type-tag ms-type-operation">Operation</span>`;
+    const adjCell = isSystem
+      ? `<span style="color:#9CA3AF;font-size:12px;">—</span>`
+      : `<div style="display:flex;align-items:center;gap:6px;">
+           <div class="sp-adj-toggle">
+             <button class="sp-adj-btn active" id="sp-btn-delay-${i}" onclick="setSpMode(${i},'delay')">+Xd</button>
+             <button class="sp-adj-btn" id="sp-btn-date-${i}" onclick="setSpMode(${i},'date')">Date</button>
+           </div>
+           <input class="sp-delay-input" id="sp-delay-${i}" type="number" min="0" placeholder="0" oninput="onSpDelayChange(${i},this)" />
+           <input class="sp-date-input" id="sp-date-${i}" type="date" value="${origStr}" style="display:none;" oninput="onSpDateChange(${i},this)" />
+         </div>`;
+    return '<tr style="' + rowBg + '" id="sp-row-' + i + '" data-orig="' + origStr + '" data-offset="' + m.offset + '">'
+      + '<td style="padding:11px 16px;font-size:12px;color:#9CA3AF;">' + (i+1) + '</td>'
+      + '<td style="padding:11px 16px;"><span class="cal-chip" style="background:' + m.bg + ';color:' + m.color + ';">' + m.label + '</span></td>'
+      + '<td style="padding:11px 16px;">' + typeBadge + '</td>'
+      + '<td style="padding:11px 16px;font-size:13px;color:#374151;" id="sp-orig-' + i + '">' + origStr + '</td>'
+      + '<td style="padding:11px 16px;" colspan="2">' + adjCell + '</td>'
+      + '<td style="padding:11px 16px;font-size:12px;" id="sp-newdate-' + i + '"><span class="sp-new-date unchanged">—</span></td>'
+      + '</tr>';
+  }).join('');
+  renderSpPreview(cycleNum);
+}
+
+function setSpMode(idx, mode) {
+  spModes[idx] = mode;
+  const delayInp = document.getElementById('sp-delay-' + idx);
+  const dateInp  = document.getElementById('sp-date-'  + idx);
+  document.getElementById('sp-btn-delay-' + idx).classList.toggle('active', mode === 'delay');
+  document.getElementById('sp-btn-date-'  + idx).classList.toggle('active', mode === 'date');
+  delayInp.style.display = mode === 'delay' ? '' : 'none';
+  dateInp.style.display  = mode === 'date'  ? '' : 'none';
+  updateSpNewDate(idx);
+}
+
+function onSpDelayChange(idx, input) {
+  const delay = parseInt(input.value, 10);
+  input.classList.toggle('changed', !isNaN(delay) && delay !== 0);
+  updateSpNewDate(idx);
+  if (spCascadeOn) cascadeFrom(idx);
+}
+
+function onSpDateChange(idx, input) {
+  updateSpNewDate(idx);
+}
+
+function updateSpNewDate(idx) {
+  const row = document.getElementById('sp-row-' + idx);
+  if (!row) return;
+  const origStr = row.dataset.orig;
+  const cell = document.getElementById('sp-newdate-' + idx);
+  const mode = spModes[idx] || 'delay';
+  let newDate;
+  if (mode === 'delay') {
+    const delay = parseInt((document.getElementById('sp-delay-' + idx) || {}).value, 10);
+    if (isNaN(delay) || delay === 0) { cell.innerHTML = '<span class="sp-new-date unchanged">—</span>'; return; }
+    const d = new Date(origStr + 'T00:00:00');
+    d.setDate(d.getDate() + delay);
+    newDate = d.toISOString().slice(0,10);
+  } else {
+    newDate = (document.getElementById('sp-date-' + idx) || {}).value;
+    if (!newDate || newDate === origStr) { cell.innerHTML = '<span class="sp-new-date unchanged">—</span>'; return; }
+  }
+  cell.innerHTML = `<span class="sp-new-date changed">⇒ ${newDate}</span>`;
+  renderSpPreview(parseInt((document.getElementById('sp-cycle-select') || {}).value) || 18);
+}
+
+function cascadeFrom(changedIdx) {
+  const milestones = OPS_FLOW_MILESTONES['abs'];
+  const delay = parseInt((document.getElementById('sp-delay-' + changedIdx) || {}).value, 10);
+  if (isNaN(delay) || delay === 0) return;
+  for (let i = changedIdx + 1; i < milestones.length; i++) {
+    if (milestones[i].type === 'system') continue;
+    const inp = document.getElementById('sp-delay-' + i);
+    if (inp && spModes[i] === 'delay') {
+      const cur = parseInt(inp.value, 10) || 0;
+      inp.value = Math.max(0, cur + delay - (parseInt((document.getElementById('sp-delay-' + (i-1)) || {}).value, 10) || 0));
+      updateSpNewDate(i);
+    }
+  }
+}
+
+function toggleCascade() {
+  spCascadeOn = !spCascadeOn;
+  document.getElementById('cascade-chk').classList.toggle('on', spCascadeOn);
+}
+
+function renderSpPreview(cycleNum) {
+  const cycleStart = new Date((SP_CYCLE_STARTS[cycleNum] || '2026-05-19') + 'T00:00:00');
+  const milestones = OPS_FLOW_MILESTONES['abs'];
+  const body = document.getElementById('sp-preview-body');
+  if (!body) return;
+  const card = document.getElementById('sp-preview-card');
+  const cardTitle = card.querySelector('.section-title');
+  if (cardTitle) cardTitle.textContent = 'Preview — Cycle #' + cycleNum;
+
+  body.innerHTML = milestones.map((m, i) => {
+    const origDate = new Date(cycleStart);
+    origDate.setDate(origDate.getDate() + m.offset);
+    const origStr = origDate.toISOString().slice(0,10);
+    const newDateCell = document.getElementById('sp-newdate-' + i);
+    const newDateText = newDateCell ? newDateCell.textContent.replace('⇒ ','').trim() : '—';
+    const hasChange = newDateText !== '—' && newDateText !== origStr;
+    const dotColor = hasChange ? '#D97706' : m.bg;
+    const dotBorder = hasChange ? '' : `border:1.5px solid ${m.color};`;
+    const dateDisplay = hasChange
+      ? `<span style="text-decoration:line-through;color:#9CA3AF;font-size:11px;margin-right:6px;">${origStr}</span><span style="color:#D97706;font-weight:600;">${newDateText}</span>`
+      : `<span style="color:#374151;">${origStr}</span>`;
+    const typePill = m.type === 'system'
+      ? `<span style="font-size:10px;color:#9CA3AF;background:#F3F4F6;padding:1px 5px;border-radius:3px;margin-left:6px;">auto</span>` : '';
+    return `<div class="sp-preview-row">
+      <div class="sp-preview-dot" style="background:${dotColor};${dotBorder}"></div>
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:13px;color:#374151;font-weight:500;">${m.label}</span>${typePill}
+        </div>
+        <div style="margin-top:2px;">${dateDisplay}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function submitSubPlan() {
+  const toast = document.getElementById('update-toast');
+  toast.textContent = '✓ Sub Plan submitted to Ticket Center';
+  toast.classList.add('visible');
+  setTimeout(() => { toast.classList.remove('visible'); switchFlow('view'); }, 2000);
+}
+
 function switchFlow(target) {
   document.querySelectorAll('.flow').forEach(f => f.classList.remove('active'));
   if (target === 'list') {
     document.getElementById('flow-list').classList.add('active');
   } else if (target === 'view') {
     document.getElementById('flow-view').classList.add('active');
-    // default to portfolio tab on entry
-    switchViewTab('vt-portfolio', document.querySelectorAll('.view-tab')[1]);
+    switchViewTab('vt-plan', document.querySelectorAll('.view-tab')[2]);
+  } else if (target === 'sub-plan') {
+    document.getElementById('flow-sub-plan').classList.add('active');
+    initSubPlan();
   } else {
     document.getElementById('flow-create').classList.add('active');
   }
