@@ -290,8 +290,8 @@ tr.drag-over { border-top: 2px solid #2563EB; }
 .ops-flow-card.selected { border-color: #2563EB; background: #EFF6FF; }
 .ops-flow-card-top { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
 .ops-flow-card-title { font-size: 13px; font-weight: 700; color: #111827; }
-.ops-flow-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 0; }
-.ops-stat { display: flex; flex-direction: column; gap: 1px; }
+.ops-flow-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 0; margin-top: 4px; }
+.ops-stat { display: flex; flex-direction: column; gap: 2px; align-items: center; text-align: center; padding: 4px 0; }
 .ops-stat-label { font-size: 10px; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.04em; }
 .ops-stat-val { font-size: 12px; font-weight: 600; color: #374151; }
 .ops-stat-green { color: #16A34A !important; }
@@ -308,6 +308,12 @@ tr.drag-over { border-top: 2px solid #2563EB; }
 .tpl-dd-item { display: flex; align-items: center; justify-content: space-between; padding: 9px 14px; cursor: pointer; font-size: 13px; color: #374151; }
 .tpl-dd-item:hover { background: #F9FAFB; }
 .tpl-dd-tag { font-size: 11px; color: #9CA3AF; background: #F3F4F6; padding: 2px 7px; border-radius: 4px; margin-left: 8px; }
+
+/* ── Holiday region chips (per milestone) ── */
+.hol-chips { display:flex; flex-wrap:wrap; gap:4px; }
+.hol-chip { padding:2px 7px; border-radius:4px; font-size:10px; font-weight:600; cursor:pointer; border:1.5px solid #E5E7EB; color:#6B7280; background:#fff; transition:all .12s; user-select:none; }
+.hol-chip.on { background:#EFF6FF; border-color:#2563EB; color:#2563EB; }
+.hol-chip.locked { opacity:.35; pointer-events:none; }
 
 /* ── Milestone offset number input ── */
 .ms-offset-input { width: 70px; border: 1px solid #D1D5DB; border-radius: 5px; padding: 5px 8px; font-size: 13px; color: #374151; text-align: center; outline: none; }
@@ -1066,10 +1072,10 @@ tr.drag-over { border-top: 2px solid #2563EB; }
         <div class="form-group" style="max-width:280px;">
           <label class="form-label">Offset Day Type <span class="req">*</span></label>
           <div class="radio-opts" style="margin-top:4px;">
-            <div class="radio-opt selected" id="daytype-cal" onclick="selectDayType('cal')">
+            <div class="radio-opt selected" id="daytype-cal" onclick="selectDayType('cal')" style="justify-content:center;">
               <div class="radio-dot on" id="daytype-dot-cal"></div>Calendar Days
             </div>
-            <div class="radio-opt" id="daytype-biz" onclick="selectDayType('biz')">
+            <div class="radio-opt" id="daytype-biz" onclick="selectDayType('biz')" style="justify-content:center;">
               <div class="radio-dot" id="daytype-dot-biz"></div>Business Days
             </div>
           </div>
@@ -1103,8 +1109,9 @@ tr.drag-over { border-top: 2px solid #2563EB; }
               <tr>
                 <th style="width:44px;">#</th>
                 <th>Milestone</th>
-                <th style="width:120px;">Type</th>
-                <th style="width:200px;">Offset (days from Cycle Start)</th>
+                <th style="width:110px;">Type</th>
+                <th style="width:180px;">Offset (days from Cycle Start)</th>
+                <th style="width:220px;">Skip Holidays of</th>
               </tr>
             </thead>
             <tbody id="milestone-config-tbody"></tbody>
@@ -2712,11 +2719,18 @@ function renderMilestoneTable(type) {
     const offsetCell = isSystem
       ? `<span style="color:#9CA3AF;font-size:13px;">+${m.offset}d &nbsp;<span style="font-size:11px;font-weight:500;">auto</span></span>`
       : `<div style="display:flex;align-items:center;gap:6px;"><span style="font-size:12px;color:#9CA3AF;">+</span><input class="ms-offset-input" type="number" value="${m.offset}" min="0" onchange="onOffsetChange(${i},this)" /><span style="font-size:12px;color:#9CA3AF;">days</span></div>`;
+    const holRegions = ['TH','MY','SG','HK','US'];
+    const holCell = isSystem
+      ? `<span style="color:#D1D5DB;font-size:13px;">—</span>`
+      : `<div class="hol-chips">${holRegions.map(r =>
+          `<span class="hol-chip${r==='TH'?' on':''}" onclick="this.classList.toggle('on')">${r}</span>`
+        ).join('')}</div>`;
     return `<tr style="${rowStyle}">
       <td style="color:#9CA3AF;font-size:12px;padding-left:20px;">${i + 1}</td>
       <td><span class="cal-chip" style="background:${m.bg};color:${m.color};">${m.label}</span></td>
       <td>${typeBadge}</td>
       <td style="padding:10px 14px;">${offsetCell}</td>
+      <td style="padding:10px 14px;">${holCell}</td>
     </tr>`;
   }).join('');
 }
