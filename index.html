@@ -224,6 +224,33 @@ tr.drag-over { border-top: 2px solid #2563EB; }
 .tn-input:focus { border-color: #2563EB; background: #fff; box-shadow: 0 0 0 2px rgba(37,99,235,0.1); }
 .tn-changed { border-color: #FBBF24 !important; background: #FFFBEB !important; }
 
+/* ── Bulk action bar ── */
+.bulk-bar { position:fixed; bottom:0; left:220px; right:0; background:#1E293B; color:#fff; padding:14px 28px; display:flex; align-items:center; justify-content:space-between; z-index:300; transform:translateY(100%); transition:transform .22s ease; }
+.bulk-bar.visible { transform:translateY(0); }
+.bulk-bar-left { display:flex; align-items:center; gap:14px; font-size:13px; }
+.bulk-count { background:#2563EB; color:#fff; border-radius:20px; padding:2px 10px; font-size:12px; font-weight:700; }
+.bulk-bar-actions { display:flex; gap:10px; }
+.btn-bulk-primary { background:#2563EB; color:#fff; border:none; border-radius:6px; padding:8px 18px; font-size:13px; font-weight:600; cursor:pointer; }
+.btn-bulk-primary:hover { background:#1D4ED8; }
+.btn-bulk-ghost { background:transparent; color:rgba(255,255,255,.7); border:1px solid rgba(255,255,255,.25); border-radius:6px; padding:8px 16px; font-size:13px; cursor:pointer; }
+.btn-bulk-ghost:hover { background:rgba(255,255,255,.08); color:#fff; }
+
+/* ── Row checkbox ── */
+.row-chk { width:16px; height:16px; accent-color:#2563EB; cursor:pointer; }
+.lender-table tbody tr.selected td { background:#EFF6FF !important; }
+
+/* ── Batch Adjust modal ── */
+.batch-modal { width:640px; }
+.batch-section { margin-bottom:20px; }
+.batch-section-title { font-size:12px; font-weight:700; color:#6B7280; text-transform:uppercase; letter-spacing:.05em; margin-bottom:10px; }
+.batch-funder-chip { display:inline-flex; align-items:center; gap:5px; background:#F3F4F6; border:1px solid #E5E7EB; border-radius:6px; padding:4px 10px; font-size:12px; color:#374151; margin:3px; }
+.batch-funder-chip .remove-chip { color:#9CA3AF; cursor:pointer; font-size:14px; line-height:1; }
+.batch-funder-chip .remove-chip:hover { color:#DC2626; }
+.ms-check-row { display:flex; align-items:center; justify-content:space-between; padding:9px 0; border-bottom:1px solid #F3F4F6; }
+.ms-check-row:last-child { border-bottom:none; }
+.ms-check-left { display:flex; align-items:center; gap:10px; }
+.ms-check-delay { display:flex; align-items:center; gap:6px; }
+
 /* ── Sub Plan components ── */
 .sp-cascade-label { display:flex; align-items:center; gap:8px; cursor:pointer; font-size:13px; color:#374151; user-select:none; }
 .sp-cascade-check { width:16px; height:16px; border:2px solid #D1D5DB; border-radius:3px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10px; color:#fff; transition:all .15s; }
@@ -1388,126 +1415,104 @@ tr.drag-over { border-top: 2px solid #2563EB; }
         <div class="section-card" style="overflow:hidden;">
           <table class="lender-table">
             <thead><tr>
+              <th style="width:40px;padding:11px 10px 11px 16px;"><input type="checkbox" class="row-chk" id="chk-all" onchange="toggleSelectAll(this)" /></th>
               <th style="width:40px;">#</th>
               <th style="width:90px;">Funder ID</th>
-              <th style="min-width:220px;">Funder Name</th>
+              <th style="min-width:200px;">Funder Name</th>
               <th style="width:90px;">Status</th>
-              <th style="width:110px;">Platform/Agent</th>
+              <th style="width:90px;">Ops Flow</th>
               <th style="width:100px;">Funder Scheme</th>
               <th style="width:160px;">Create Time</th>
               <th style="width:160px;">OPERATION</th>
             </tr></thead>
             <tbody>
-              <tr>
+              <tr id="lrow-1">
+                <td style="padding:11px 10px 11px 16px;"><input type="checkbox" class="row-chk" onchange="onRowCheck(this,'TH_SPC_UNICORN','ABS Net')" /></td>
                 <td class="num-col">1</td><td class="num-col">1240037</td>
                 <td style="font-weight:500;">TH_SPC_UNICORN</td>
                 <td><span class="status-badge status-active-badge">ACTIVE</span></td>
-                <td style="color:#6B7280;">UNKNOWN</td>
+                <td><span style="font-size:11px;font-weight:600;color:#065F46;background:#D1FAE5;padding:2px 7px;border-radius:4px;">ABS Net</span></td>
                 <td><span class="scheme-badge">ABS</span></td>
                 <td style="color:#9CA3AF;font-size:12px;">2023-08-19 15:01:35</td>
-                <td><div class="tbl-actions">
-                  <button class="tbl-act-link">View</button><span class="tbl-act-sep">|</span>
-                  <button class="tbl-act-link">Edit</button><span class="tbl-act-sep">|</span>
-                  <button class="tbl-act-link">More ▾</button>
-                </div></td>
+                <td><div class="tbl-actions"><button class="tbl-act-link">View</button><span class="tbl-act-sep">|</span><button class="tbl-act-link">Edit</button><span class="tbl-act-sep">|</span><button class="tbl-act-link">More ▾</button></div></td>
               </tr>
-              <tr>
+              <tr id="lrow-2">
+                <td style="padding:11px 10px 11px 16px;"><input type="checkbox" class="row-chk" onchange="onRowCheck(this,'TH_SPL_Pioneer_01','ABS')" /></td>
                 <td class="num-col">2</td><td class="num-col">194191</td>
                 <td style="font-weight:500;">TH_SPL_Pioneer_01</td>
                 <td><span class="status-badge status-active-badge">ACTIVE</span></td>
-                <td style="color:#6B7280;">UNKNOWN</td>
+                <td><span style="font-size:11px;font-weight:600;color:#1D4ED8;background:#DBEAFE;padding:2px 7px;border-radius:4px;">ABS</span></td>
                 <td><span class="scheme-badge">ABS</span></td>
                 <td style="color:#9CA3AF;font-size:12px;">2023-08-05 11:29:04</td>
-                <td><div class="tbl-actions">
-                  <button class="tbl-act-link">View</button><span class="tbl-act-sep">|</span>
-                  <button class="tbl-act-link">Edit</button><span class="tbl-act-sep">|</span>
-                  <button class="tbl-act-link">More ▾</button>
-                </div></td>
+                <td><div class="tbl-actions"><button class="tbl-act-link">View</button><span class="tbl-act-sep">|</span><button class="tbl-act-link">Edit</button><span class="tbl-act-sep">|</span><button class="tbl-act-link">More ▾</button></div></td>
               </tr>
-              <tr>
+              <tr id="lrow-3">
+                <td style="padding:11px 10px 11px 16px;"><input type="checkbox" class="row-chk" onchange="onRowCheck(this,'BCL_SEABANK01','ABS')" /></td>
                 <td class="num-col">3</td><td class="num-col">199530</td>
                 <td style="font-weight:500;">BCL_SEABANK01</td>
                 <td><span class="status-badge status-draft-badge">DRAFT</span></td>
-                <td style="color:#6B7280;">UNKNOWN</td>
+                <td><span style="font-size:11px;font-weight:600;color:#1D4ED8;background:#DBEAFE;padding:2px 7px;border-radius:4px;">ABS</span></td>
                 <td><span class="scheme-badge">ABS</span></td>
                 <td style="color:#9CA3AF;font-size:12px;">2023-08-11 08:35:09</td>
-                <td><div class="tbl-actions">
-                  <button class="tbl-act-link">View</button><span class="tbl-act-sep">|</span>
-                  <button class="tbl-act-link">Edit</button><span class="tbl-act-sep">|</span>
-                  <button class="tbl-act-link">More ▾</button>
-                </div></td>
+                <td><div class="tbl-actions"><button class="tbl-act-link">View</button><span class="tbl-act-sep">|</span><button class="tbl-act-link">Edit</button><span class="tbl-act-sep">|</span><button class="tbl-act-link">More ▾</button></div></td>
               </tr>
-              <tr>
+              <tr id="lrow-4">
+                <td style="padding:11px 10px 11px 16px;"><input type="checkbox" class="row-chk" onchange="onRowCheck(this,'USD4_SPL_ABS_01','ABL')" /></td>
                 <td class="num-col">4</td><td class="num-col">1040011</td>
                 <td style="font-weight:500;">USD4_SPL_ABS_01</td>
                 <td><span class="status-badge status-inactive-badge">INACTIVE</span></td>
-                <td style="color:#6B7280;">UNKNOWN</td>
+                <td><span style="font-size:11px;font-weight:600;color:#6B7280;background:#F3F4F6;padding:2px 7px;border-radius:4px;">ABL</span></td>
                 <td><span class="scheme-badge" style="background:#F3F4F6;color:#6B7280;">ABL</span></td>
                 <td style="color:#9CA3AF;font-size:12px;">2024-01-27 09:11:53</td>
-                <td><div class="tbl-actions">
-                  <button class="tbl-act-link">View</button><span class="tbl-act-sep">|</span>
-                  <button class="tbl-act-link">Edit</button><span class="tbl-act-sep">|</span>
-                  <button class="tbl-act-link">More ▾</button>
-                </div></td>
+                <td><div class="tbl-actions"><button class="tbl-act-link">View</button><span class="tbl-act-sep">|</span><button class="tbl-act-link">Edit</button><span class="tbl-act-sep">|</span><button class="tbl-act-link">More ▾</button></div></td>
               </tr>
-              <tr>
+              <tr id="lrow-5">
+                <td style="padding:11px 10px 11px 16px;"><input type="checkbox" class="row-chk" onchange="onRowCheck(this,'TH_MAD_SPL_ABS_01','ABS')" /></td>
                 <td class="num-col">5</td><td class="num-col">1000527</td>
                 <td style="font-weight:500;">TH_MAD_SPL_ABS_01</td>
                 <td><span class="status-badge" style="background:#F3F4F6;color:#6B7280;">—</span></td>
-                <td style="color:#6B7280;">Seamless</td>
+                <td><span style="font-size:11px;font-weight:600;color:#1D4ED8;background:#DBEAFE;padding:2px 7px;border-radius:4px;">ABS</span></td>
                 <td><span class="scheme-badge" style="background:#FEF3C7;color:#D97706;">YBL</span></td>
                 <td style="color:#9CA3AF;font-size:12px;">2024-07-19 17:09:53</td>
-                <td><div class="tbl-actions">
-                  <button class="tbl-act-link">View</button><span class="tbl-act-sep">|</span>
-                  <button class="tbl-act-link">Edit</button><span class="tbl-act-sep">|</span>
-                  <button class="tbl-act-link">More ▾</button>
-                </div></td>
+                <td><div class="tbl-actions"><button class="tbl-act-link">View</button><span class="tbl-act-sep">|</span><button class="tbl-act-link">Edit</button><span class="tbl-act-sep">|</span><button class="tbl-act-link">More ▾</button></div></td>
               </tr>
-              <tr>
+              <tr id="lrow-6">
+                <td style="padding:11px 10px 11px 16px;"><input type="checkbox" class="row-chk" onchange="onRowCheck(this,'TH_SPL_Allstar_ABS_01','ABS Net')" /></td>
                 <td class="num-col">6</td><td class="num-col">1040641</td>
                 <td style="font-weight:500;">TH_SPL_Allstar_ABS_01</td>
                 <td><span class="status-badge" style="background:#F3F4F6;color:#6B7280;">—</span></td>
-                <td style="color:#6B7280;">Seamless</td>
+                <td><span style="font-size:11px;font-weight:600;color:#065F46;background:#D1FAE5;padding:2px 7px;border-radius:4px;">ABS Net</span></td>
                 <td><span class="scheme-badge">ABS</span></td>
                 <td style="color:#9CA3AF;font-size:12px;">2024-08-09 14:38:12</td>
-                <td><div class="tbl-actions">
-                  <button class="tbl-act-link">View</button><span class="tbl-act-sep">|</span>
-                  <button class="tbl-act-link">Edit</button><span class="tbl-act-sep">|</span>
-                  <button class="tbl-act-link">More ▾</button>
-                </div></td>
+                <td><div class="tbl-actions"><button class="tbl-act-link">View</button><span class="tbl-act-sep">|</span><button class="tbl-act-link">Edit</button><span class="tbl-act-sep">|</span><button class="tbl-act-link">More ▾</button></div></td>
               </tr>
-              <tr>
+              <tr id="lrow-7">
+                <td style="padding:11px 10px 11px 16px;"><input type="checkbox" class="row-chk" onchange="onRowCheck(this,'TH_MND_SPL_ABS_01_2024','ABL')" /></td>
                 <td class="num-col">7</td><td class="num-col">1061001</td>
                 <td style="font-weight:500;">TH_MND_SPL_ABS_01_2024</td>
                 <td><span class="status-badge" style="background:#F3F4F6;color:#6B7280;">—</span></td>
-                <td style="color:#6B7280;">Seamless</td>
+                <td><span style="font-size:11px;font-weight:600;color:#6B7280;background:#F3F4F6;padding:2px 7px;border-radius:4px;">ABL</span></td>
                 <td><span class="scheme-badge" style="background:#F3F4F6;color:#6B7280;">ABL</span></td>
                 <td style="color:#9CA3AF;font-size:12px;">2024-11-18 16:41:53</td>
-                <td><div class="tbl-actions">
-                  <button class="tbl-act-link">View</button><span class="tbl-act-sep">|</span>
-                  <button class="tbl-act-link">Edit</button><span class="tbl-act-sep">|</span>
-                  <button class="tbl-act-link">More ▾</button>
-                </div></td>
+                <td><div class="tbl-actions"><button class="tbl-act-link">View</button><span class="tbl-act-sep">|</span><button class="tbl-act-link">Edit</button><span class="tbl-act-sep">|</span><button class="tbl-act-link">More ▾</button></div></td>
               </tr>
-              <tr>
+              <tr id="lrow-8">
+                <td style="padding:11px 10px 11px 16px;"><input type="checkbox" class="row-chk" onchange="onRowCheck(this,'TH_SPL_SPL_01','ABL')" /></td>
                 <td class="num-col">8</td><td class="num-col">1085111</td>
                 <td style="font-weight:500;">TH_SPL_SPL_01</td>
                 <td><span class="status-badge" style="background:#F3F4F6;color:#6B7280;">—</span></td>
-                <td style="color:#6B7280;">Seamless</td>
+                <td><span style="font-size:11px;font-weight:600;color:#6B7280;background:#F3F4F6;padding:2px 7px;border-radius:4px;">ABL</span></td>
                 <td><span class="scheme-badge" style="background:#F3F4F6;color:#6B7280;">ABL</span></td>
                 <td style="color:#9CA3AF;font-size:12px;">2024-11-19 17:40:48</td>
-                <td><div class="tbl-actions">
-                  <button class="tbl-act-link">View</button><span class="tbl-act-sep">|</span>
-                  <button class="tbl-act-link">Edit</button><span class="tbl-act-sep">|</span>
-                  <button class="tbl-act-link">More ▾</button>
-                </div></td>
+                <td><div class="tbl-actions"><button class="tbl-act-link">View</button><span class="tbl-act-sep">|</span><button class="tbl-act-link">Edit</button><span class="tbl-act-sep">|</span><button class="tbl-act-link">More ▾</button></div></td>
               </tr>
-              <!-- Starlight — the funder from our mockup -->
-              <tr style="background:#FFFBEB;">
+              <!-- Starlight -->
+              <tr id="lrow-9" style="background:#FFFBEB;">
+                <td style="padding:11px 10px 11px 16px;"><input type="checkbox" class="row-chk" onchange="onRowCheck(this,'TH_SPL_Starlight_ABS_01','ABS')" /></td>
                 <td class="num-col">9</td><td class="num-col">1051002</td>
                 <td style="font-weight:600;color:#111827;">TH_SPL_Starlight_ABS_01 <span style="font-size:11px;background:#EFF6FF;color:#2563EB;padding:1px 6px;border-radius:4px;margin-left:4px;font-weight:500;">this funder</span></td>
                 <td><span class="status-badge status-active-badge">ACTIVE</span></td>
-                <td style="color:#6B7280;">Seamless</td>
+                <td><span style="font-size:11px;font-weight:600;color:#1D4ED8;background:#DBEAFE;padding:2px 7px;border-radius:4px;">ABS</span></td>
                 <td><span class="scheme-badge">ABS</span></td>
                 <td style="color:#9CA3AF;font-size:12px;">2024-12-13 09:17:02</td>
                 <td><div class="tbl-actions">
@@ -1529,6 +1534,136 @@ tr.drag-over { border-top: 2px solid #2563EB; }
       </div>
     </div><!-- /sidebar-main -->
   </div><!-- /app-layout -->
+
+  <!-- Bulk Action Bar -->
+  <div class="bulk-bar" id="bulk-bar">
+    <div class="bulk-bar-left">
+      <span class="bulk-count" id="bulk-count">0</span>
+      <span>plans selected</span>
+      <span style="color:rgba(255,255,255,.35);margin:0 4px;">·</span>
+      <span id="bulk-names" style="color:rgba(255,255,255,.6);font-size:12px;max-width:420px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+    </div>
+    <div class="bulk-bar-actions">
+      <button class="btn-bulk-ghost" onclick="clearAllSelections()">Clear</button>
+      <button class="btn-bulk-primary" onclick="openBatchModal()">Adjust Selected Plans →</button>
+    </div>
+  </div>
+
+  <!-- Batch Adjust Modal -->
+  <div class="modal-overlay" id="batch-modal">
+    <div class="modal batch-modal">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title">Batch Adjust Plans</div>
+          <div class="modal-sub" id="batch-modal-sub">Delay milestones across selected plans for the same date range.</div>
+        </div>
+        <button class="modal-close" onclick="document.getElementById('batch-modal').classList.remove('open')">✕</button>
+      </div>
+      <div class="modal-body" style="padding:20px 24px;overflow-y:auto;max-height:60vh;">
+
+        <!-- Selected funders chips -->
+        <div class="batch-section">
+          <div class="batch-section-title">Selected Plans</div>
+          <div id="batch-chips"></div>
+        </div>
+
+        <!-- Affected date range -->
+        <div class="batch-section">
+          <div class="batch-section-title">Affected Date Range</div>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <label style="font-size:12px;color:#6B7280;">From</label>
+              <input class="form-input" type="date" id="batch-from" style="width:160px;" value="2026-05-19" />
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <label style="font-size:12px;color:#6B7280;">To</label>
+              <input class="form-input" type="date" id="batch-to" style="width:160px;" value="2026-06-15" />
+            </div>
+            <span style="font-size:11px;color:#9CA3AF;">System matches milestones falling within this range across all selected plans.</span>
+          </div>
+        </div>
+
+        <!-- Reason -->
+        <div class="batch-section">
+          <div class="batch-section-title">Reason <span style="color:#DC2626;">*</span></div>
+          <input class="form-input" placeholder="e.g. Thailand public holiday — Visakha Bucha Day" style="width:100%;" />
+        </div>
+
+        <!-- Milestone adjustments -->
+        <div class="batch-section">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <div class="batch-section-title" style="margin-bottom:0;">Milestone Delay</div>
+            <label class="sp-cascade-label">
+              <div class="sp-cascade-check on" id="batch-cascade-chk" onclick="this.classList.toggle('on')"></div>
+              <span style="font-size:12px;">Auto-cascade subsequent milestones</span>
+            </label>
+          </div>
+          <div style="font-size:11px;color:#9CA3AF;margin-bottom:12px;">Leave delay = 0 to keep original schedule. Only Operation milestones can be adjusted.</div>
+
+          <div class="ms-check-row" style="background:#F9FAFB;padding:6px 0;border-radius:4px 4px 0 0;border-bottom:1px solid #E5E7EB;">
+            <div style="font-size:11px;font-weight:600;color:#6B7280;width:200px;padding-left:4px;">Milestone</div>
+            <div style="font-size:11px;font-weight:600;color:#6B7280;width:80px;">Type</div>
+            <div style="font-size:11px;font-weight:600;color:#6B7280;">Delay (days)</div>
+          </div>
+          <div class="ms-check-row">
+            <div class="ms-check-left"><span class="cal-chip" style="background:#DBEAFE;color:#1D4ED8;">Servicer Report Date</span></div>
+            <div style="width:80px;"><span class="ms-type-tag ms-type-operation">Operation</span></div>
+            <div class="ms-check-delay"><input class="sp-delay-input" type="number" min="0" value="0" style="width:60px;" /><span style="font-size:12px;color:#9CA3AF;">days</span></div>
+          </div>
+          <div class="ms-check-row">
+            <div class="ms-check-left"><span class="cal-chip" style="background:#EDE9FE;color:#6D28D9;">Batch Creation Date</span></div>
+            <div style="width:80px;"><span class="ms-type-tag ms-type-operation">Operation</span></div>
+            <div class="ms-check-delay"><input class="sp-delay-input" type="number" min="0" value="3" style="width:60px;" /><span style="font-size:12px;color:#9CA3AF;">days</span></div>
+          </div>
+          <div class="ms-check-row">
+            <div class="ms-check-left"><span class="cal-chip" style="background:#FEF3C7;color:#92400E;">Sale Notice Date</span></div>
+            <div style="width:80px;"><span class="ms-type-tag ms-type-operation">Operation</span></div>
+            <div class="ms-check-delay"><input class="sp-delay-input" type="number" min="0" value="3" style="width:60px;" /><span style="font-size:12px;color:#9CA3AF;">days</span></div>
+          </div>
+          <div class="ms-check-row" style="background:#F9FAFB;">
+            <div class="ms-check-left"><span class="cal-chip" style="background:#F3F4F6;color:#6B7280;">System Cutoff Date</span></div>
+            <div style="width:80px;"><span class="ms-type-tag ms-type-system">System</span></div>
+            <div style="font-size:12px;color:#9CA3AF;">— auto</div>
+          </div>
+          <div class="ms-check-row">
+            <div class="ms-check-left"><span class="cal-chip" style="background:#D1FAE5;color:#065F46;">Sale Date</span></div>
+            <div style="width:80px;"><span class="ms-type-tag ms-type-operation">Operation</span></div>
+            <div class="ms-check-delay"><input class="sp-delay-input" type="number" min="0" value="3" style="width:60px;" /><span style="font-size:12px;color:#9CA3AF;">days</span></div>
+          </div>
+          <div class="ms-check-row" style="background:#F9FAFB;">
+            <div class="ms-check-left"><span class="cal-chip" style="background:#F3F4F6;color:#6B7280;">System Selling Date</span></div>
+            <div style="width:80px;"><span class="ms-type-tag ms-type-system">System</span></div>
+            <div style="font-size:12px;color:#9CA3AF;">— auto</div>
+          </div>
+          <div class="ms-check-row">
+            <div class="ms-check-left"><span class="cal-chip" style="background:#CCFBF1;color:#0F766E;">Collection Deposit Date</span></div>
+            <div style="width:80px;"><span class="ms-type-tag ms-type-operation">Operation</span></div>
+            <div class="ms-check-delay"><input class="sp-delay-input" type="number" min="0" value="3" style="width:60px;" /><span style="font-size:12px;color:#9CA3AF;">days</span></div>
+          </div>
+
+          <!-- Holiday calendar -->
+          <div style="margin-top:14px;padding-top:14px;border-top:1px solid #F3F4F6;">
+            <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:8px;">Skip holidays of</div>
+            <div class="checkbox-opts">
+              <div class="checkbox-opt checked" onclick="this.classList.toggle('checked')"><div class="chk-box">✓</div>Thailand (TH)</div>
+              <div class="checkbox-opt" onclick="this.classList.toggle('checked')"><div class="chk-box"></div>Malaysia (MY)</div>
+              <div class="checkbox-opt" onclick="this.classList.toggle('checked')"><div class="chk-box"></div>Singapore (SG)</div>
+              <div class="checkbox-opt" onclick="this.classList.toggle('checked')"><div class="chk-box"></div>Hong Kong (HK)</div>
+              <div class="checkbox-opt" onclick="this.classList.toggle('checked')"><div class="chk-box"></div>United States (US)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <span style="font-size:12px;color:#9CA3AF;">Will generate <strong id="batch-plan-count" style="color:#111827;">0</strong> Sub Plan draft(s) pending BD approval.</span>
+        <div style="display:flex;gap:10px;">
+          <button class="btn-outline-sm" style="padding:9px 18px;" onclick="document.getElementById('batch-modal').classList.remove('open')">Cancel</button>
+          <button class="btn-primary-lg" style="padding:9px 20px;font-size:13px;" onclick="submitBatchAdjust()">Submit to TC →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div><!-- /flow-list -->
 
 <!-- ══════════════════════════════════════
@@ -2036,6 +2171,100 @@ function toggleCheckbox(el) {
 }
 
 /* ── Flow switching ── */
+/* ══ Library multi-select & bulk action ══ */
+let selectedPlans = {}; // { name: opsFlow }
+
+function onRowCheck(chk, name, opsFlow) {
+  const row = chk.closest('tr');
+  if (chk.checked) {
+    selectedPlans[name] = opsFlow;
+    row.classList.add('selected');
+  } else {
+    delete selectedPlans[name];
+    row.classList.remove('selected');
+  }
+  updateSelectAll();
+  updateBulkBar();
+}
+
+function toggleSelectAll(masterChk) {
+  document.querySelectorAll('#flow-list .row-chk:not(#chk-all)').forEach(chk => {
+    chk.checked = masterChk.checked;
+    const row = chk.closest('tr');
+    const name = chk.getAttribute('onchange').match(/'([^']+)'/)?.[1] || '';
+    const flow = chk.getAttribute('onchange').match(/'([^']+)'/g)?.[1]?.replace(/'/g,'') || '';
+    if (masterChk.checked) { selectedPlans[name] = flow; row.classList.add('selected'); }
+    else { delete selectedPlans[name]; row.classList.remove('selected'); }
+  });
+  updateBulkBar();
+}
+
+function updateSelectAll() {
+  const all = document.querySelectorAll('#flow-list .row-chk:not(#chk-all)');
+  const checked = document.querySelectorAll('#flow-list .row-chk:not(#chk-all):checked');
+  const master = document.getElementById('chk-all');
+  if (!master) return;
+  master.indeterminate = checked.length > 0 && checked.length < all.length;
+  master.checked = checked.length === all.length && all.length > 0;
+}
+
+function updateBulkBar() {
+  const bar = document.getElementById('bulk-bar');
+  const count = Object.keys(selectedPlans).length;
+  document.getElementById('bulk-count').textContent = count;
+  document.getElementById('bulk-names').textContent = Object.keys(selectedPlans).join(' · ');
+  bar.classList.toggle('visible', count > 0);
+}
+
+function clearAllSelections() {
+  selectedPlans = {};
+  document.querySelectorAll('#flow-list .row-chk').forEach(c => { c.checked = false; c.indeterminate = false; });
+  document.querySelectorAll('#flow-list tbody tr').forEach(r => r.classList.remove('selected'));
+  updateBulkBar();
+}
+
+function openBatchModal() {
+  const names = Object.keys(selectedPlans);
+  document.getElementById('batch-modal-sub').textContent =
+    'Delay milestones across ' + names.length + ' selected plan(s) for the same date range.';
+  document.getElementById('batch-plan-count').textContent = names.length;
+  // render chips
+  document.getElementById('batch-chips').innerHTML = names.map(n =>
+    '<span class="batch-funder-chip"><span>' + n + '</span>' +
+    '<span class="remove-chip" onclick="removeBatchChip(this,\'' + n + '\')">×</span></span>'
+  ).join('');
+  document.getElementById('batch-modal').classList.add('open');
+}
+
+function removeBatchChip(el, name) {
+  delete selectedPlans[name];
+  el.closest('.batch-funder-chip').remove();
+  const count = Object.keys(selectedPlans).length;
+  document.getElementById('batch-plan-count').textContent = count;
+  document.getElementById('batch-modal-sub').textContent =
+    'Delay milestones across ' + count + ' selected plan(s) for the same date range.';
+  // uncheck the row
+  document.querySelectorAll('#flow-list .row-chk').forEach(chk => {
+    if (chk.getAttribute('onchange') && chk.getAttribute('onchange').includes("'" + name + "'")) {
+      chk.checked = false;
+      chk.closest('tr').classList.remove('selected');
+    }
+  });
+  updateBulkBar();
+  updateSelectAll();
+  if (count === 0) document.getElementById('batch-modal').classList.remove('open');
+}
+
+function submitBatchAdjust() {
+  const count = Object.keys(selectedPlans).length;
+  document.getElementById('batch-modal').classList.remove('open');
+  clearAllSelections();
+  const toast = document.getElementById('update-toast');
+  toast.textContent = '✓ ' + count + ' Sub Plan draft(s) submitted to Ticket Center';
+  toast.classList.add('visible');
+  setTimeout(() => toast.classList.remove('visible'), 2500);
+}
+
 /* ══ Sub Plan logic ══ */
 const SP_CYCLE_STARTS = { 18:'2026-05-19', 19:'2026-06-16', 20:'2026-07-14', 21:'2026-08-11' };
 let spCascadeOn = false;
