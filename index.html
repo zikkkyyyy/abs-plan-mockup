@@ -224,6 +224,17 @@ tr.drag-over { border-top: 2px solid #2563EB; }
 .tn-input:focus { border-color: #2563EB; background: #fff; box-shadow: 0 0 0 2px rgba(37,99,235,0.1); }
 .tn-changed { border-color: #FBBF24 !important; background: #FFFBEB !important; }
 
+/* ── Cycle segment row ── */
+.cycle-seg-row { display:flex; align-items:center; gap:8px; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:6px; padding:7px 12px; }
+.cycle-seg-label { font-size:12px; color:#6B7280; width:72px; flex-shrink:0; }
+.cycle-seg-input { width:56px; border:1px solid #D1D5DB; border-radius:5px; padding:5px 8px; font-size:13px; text-align:center; outline:none; background:#fff; }
+.cycle-seg-input:focus { border-color:#2563EB; }
+.cycle-seg-sep { font-size:13px; color:#9CA3AF; }
+.cycle-seg-eom { display:inline-flex; align-items:center; gap:5px; font-size:12px; cursor:pointer; color:#374151; }
+.cycle-seg-remove { margin-left:auto; color:#9CA3AF; cursor:pointer; font-size:16px; line-height:1; padding:0 4px; }
+.cycle-seg-remove:hover { color:#DC2626; }
+.cycle-strip-seg { display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:#fff; flex:1; transition:flex .2s; }
+
 /* ── Bulk action bar ── */
 .bulk-bar { position:fixed; bottom:0; left:220px; right:0; background:#1E293B; color:#fff; padding:14px 28px; display:flex; align-items:center; justify-content:space-between; z-index:300; transform:translateY(100%); transition:transform .22s ease; }
 .bulk-bar.visible { transform:translateY(0); }
@@ -273,7 +284,7 @@ tr.drag-over { border-top: 2px solid #2563EB; }
 .sp-preview-line { width:2px; background:#E5E7EB; margin-left:4px; height:20px; margin-right:16px; margin-top:2px; }
 
 /* ── Ops Flow selector cards ── */
-.ops-flow-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.ops-flow-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 .ops-flow-card { border: 2px solid #E5E7EB; border-radius: 10px; padding: 16px; cursor: pointer; transition: all 0.15s; }
 .ops-flow-card:hover:not(.selected) { border-color: #93C5FD; }
 .ops-flow-card.selected { border-color: #2563EB; background: #EFF6FF; }
@@ -1020,6 +1031,17 @@ tr.drag-over { border-top: 2px solid #2563EB; }
               <div class="ops-stat"><span class="ops-stat-label">Mode</span><span class="ops-stat-val">Non-Net</span></div>
             </div>
           </div>
+          <div class="ops-flow-card" id="flow-card-my" onclick="selectOpsFlow('my')">
+            <div class="ops-flow-card-top">
+              <div class="radio-dot" id="flow-dot-my"></div>
+              <div class="ops-flow-card-title">MY</div>
+            </div>
+            <div class="ops-flow-stats">
+              <div class="ops-stat"><span class="ops-stat-label">Region</span><span class="ops-stat-val">Malaysia</span></div>
+              <div class="ops-stat"><span class="ops-stat-label">Mode</span><span class="ops-stat-val">Gross Basis</span></div>
+              <div class="ops-stat" style="grid-column:1/-1;"><span class="ops-stat-label">Milestones</span><span class="ops-stat-val" style="color:#D97706;">TBD — pending BD</span></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1028,32 +1050,28 @@ tr.drag-over { border-top: 2px solid #2563EB; }
     <div class="section-card">
       <div class="section-header">
         <div class="section-title">Cycle Setting</div>
+        <div class="section-sub">Define the day-ranges within a month that form each cycle. e.g. 1–5 · 6–15 · 16–25 · 26–EOM</div>
       </div>
       <div class="section-body">
-        <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label">Cycle Length <span class="req">*</span></label>
-            <select class="form-select" id="cycle-length" onchange="onCycleLengthChange(this)">
-              <option value="14">Every 2 weeks (14 days)</option>
-              <option value="28" selected>Every 4 weeks (28 days)</option>
-              <option value="56">Every 8 weeks (56 days)</option>
-              <option value="custom">Custom…</option>
-            </select>
+        <div style="margin-bottom:14px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <label class="form-label">Cycle Segments <span class="req">*</span></label>
+            <span class="add-row" onclick="addCycleSegment()">＋ Add Segment</span>
           </div>
-          <div class="form-group">
-            <label class="form-label">Offset Day Type <span class="req">*</span></label>
-            <div class="radio-opts" style="margin-top:4px;">
-              <div class="radio-opt selected" id="daytype-cal" onclick="selectDayType('cal')">
-                <div class="radio-dot on" id="daytype-dot-cal"></div>Calendar Days
-              </div>
-              <div class="radio-opt" id="daytype-biz" onclick="selectDayType('biz')">
-                <div class="radio-dot" id="daytype-dot-biz"></div>Business Days
-              </div>
+          <div id="cycle-segments-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+          <div id="cycle-preview-strip" style="display:flex;gap:3px;margin-top:12px;height:24px;border-radius:6px;overflow:hidden;"></div>
+          <div style="font-size:11px;color:#9CA3AF;margin-top:5px;">Each segment = one cycle. Pattern repeats every month.</div>
+        </div>
+        <div class="divider"></div>
+        <div class="form-group" style="max-width:280px;">
+          <label class="form-label">Offset Day Type <span class="req">*</span></label>
+          <div class="radio-opts" style="margin-top:4px;">
+            <div class="radio-opt selected" id="daytype-cal" onclick="selectDayType('cal')">
+              <div class="radio-dot on" id="daytype-dot-cal"></div>Calendar Days
             </div>
-          </div>
-          <div class="form-group" id="custom-days-group" style="display:none;">
-            <label class="form-label">Custom Length (days)</label>
-            <input class="form-input" type="number" id="custom-cycle-days" min="1" placeholder="e.g. 21" style="width:120px;" oninput="recomputeSchedule()" />
+            <div class="radio-opt" id="daytype-biz" onclick="selectDayType('biz')">
+              <div class="radio-dot" id="daytype-dot-biz"></div>Business Days
+            </div>
           </div>
         </div>
       </div>
@@ -2661,6 +2679,9 @@ const OPS_FLOW_MILESTONES = {
     { label: 'System Cutoff Date',      short: 'Sys Cutoff',  type: 'system',    offset: 3,  bg: '#F3F4F6', color: '#6B7280' },
     { label: 'Sale Date',               short: 'Sale Date',   type: 'operation', offset: 4,  bg: '#D1FAE5', color: '#065F46' },
   ],
+  'my': [
+    { label: 'TBD — Pending BD confirmation', short: 'TBD', type: 'operation', offset: 0, bg: '#FEF3C7', color: '#B45309' },
+  ],
 };
 
 let currentOpsFlow = 'abs';
@@ -2668,7 +2689,7 @@ let currentOpsFlow = 'abs';
 /* ── Ops Flow selection ── */
 function selectOpsFlow(type) {
   currentOpsFlow = type;
-  ['abs','abs-net','abl'].forEach(t => {
+  ['abs','abs-net','abl','my'].forEach(t => {
     const card = document.getElementById('flow-card-' + t);
     const dot  = document.getElementById('flow-dot-' + t);
     if (card) card.classList.toggle('selected', t === type);
@@ -2705,6 +2726,76 @@ function onOffsetChange(idx, input) {
   if (isNaN(val) || val < 0) { input.value = 0; return; }
   OPS_FLOW_MILESTONES[currentOpsFlow][idx].offset = val;
   recomputeSchedule();
+}
+
+/* ── Cycle segments ── */
+const SEG_COLORS = ['#2563EB','#7C3AED','#0891B2','#059669','#D97706','#DC2626','#6B7280'];
+let cycleSegments = [
+  { from: 1,  to: 5,   eom: false },
+  { from: 6,  to: 15,  eom: false },
+  { from: 16, to: 25,  eom: false },
+  { from: 26, to: 31,  eom: true  },
+];
+
+function initCycleSegments() {
+  renderCycleSegments();
+}
+
+function renderCycleSegments() {
+  const list = document.getElementById('cycle-segments-list');
+  if (!list) return;
+  list.innerHTML = cycleSegments.map((seg, i) => {
+    const color = SEG_COLORS[i % SEG_COLORS.length];
+    return `<div class="cycle-seg-row" id="cseg-${i}">
+      <span class="cycle-seg-label" style="color:${color};font-weight:600;">Segment ${i+1}</span>
+      <span class="cycle-seg-sep">Day</span>
+      <input class="cycle-seg-input" type="number" min="1" max="31" value="${seg.from}" oninput="onSegChange(${i},'from',this.value)" />
+      <span class="cycle-seg-sep">–</span>
+      ${seg.eom
+        ? `<span style="font-size:13px;font-weight:600;color:#374151;width:56px;text-align:center;">EOM</span>`
+        : `<input class="cycle-seg-input" type="number" min="1" max="31" value="${seg.to}" oninput="onSegChange(${i},'to',this.value)" />`}
+      <label class="cycle-seg-eom" style="margin-left:4px;">
+        <input type="checkbox" ${seg.eom ? 'checked' : ''} onchange="onSegEom(${i},this.checked)" style="accent-color:#2563EB;" />
+        <span style="font-size:11px;color:#9CA3AF;">EOM</span>
+      </label>
+      ${cycleSegments.length > 1 ? `<span class="cycle-seg-remove" onclick="removeCycleSegment(${i})">×</span>` : ''}
+    </div>`;
+  }).join('');
+  renderCycleStrip();
+}
+
+function onSegChange(idx, field, val) {
+  cycleSegments[idx][field] = parseInt(val) || 1;
+  renderCycleStrip();
+}
+
+function onSegEom(idx, checked) {
+  cycleSegments[idx].eom = checked;
+  renderCycleSegments();
+}
+
+function addCycleSegment() {
+  const last = cycleSegments[cycleSegments.length - 1];
+  const newFrom = last ? (last.eom ? 1 : last.to + 1) : 1;
+  cycleSegments.push({ from: newFrom, to: Math.min(newFrom + 4, 31), eom: false });
+  renderCycleSegments();
+}
+
+function removeCycleSegment(idx) {
+  cycleSegments.splice(idx, 1);
+  renderCycleSegments();
+}
+
+function renderCycleStrip() {
+  const strip = document.getElementById('cycle-preview-strip');
+  if (!strip) return;
+  strip.innerHTML = cycleSegments.map((seg, i) => {
+    const color = SEG_COLORS[i % SEG_COLORS.length];
+    const endDay = seg.eom ? 31 : seg.to;
+    const span = Math.max(1, endDay - seg.from + 1);
+    const label = seg.eom ? `${seg.from}–EOM` : `${seg.from}–${seg.to}`;
+    return `<div class="cycle-strip-seg" style="background:${color};flex:${span};" title="${label}">${label}</div>`;
+  }).join('');
 }
 
 /* ── Day type toggle ── */
@@ -2920,6 +3011,7 @@ function commitFlow() {
 /* ── Init after DOM ready ── */
 (function init() {
   selectOpsFlow('abs'); // populate milestone table + calendar on load
+  initCycleSegments();  // render default 4-segment cycle
 
   /* T+N inline edit */
   document.querySelectorAll('.tn-input').forEach(inp => {
