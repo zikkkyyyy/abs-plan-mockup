@@ -1425,8 +1425,19 @@ tr.drag-over { border-top: 2px solid #2563EB; }
       </div>
       <div class="list-main">
         <div class="list-toolbar">
-          <div class="list-title">Lender List</div>
-          <button class="btn-primary-lg" style="font-size:13px;padding:9px 18px;" onclick="switchFlow('create')">+ Create New Funder</button>
+          <div>
+            <div class="list-title">Lender List</div>
+            <div id="lib-select-hint" style="font-size:11px;color:#9CA3AF;margin-top:2px;display:none;">
+              ✓ <span id="lib-select-count">0</span> funder(s) selected — click "Batch Adjust Plans" to continue
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <button id="btn-batch-adjust" class="btn-outline-sm" style="padding:9px 16px;font-size:13px;color:#374151;display:flex;align-items:center;gap:6px;" onclick="onBatchAdjustClick()">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h6"/><circle cx="19" cy="18" r="3"/><path d="M19 15v3m0 0v3m0-3h3m-3 0h-3" stroke-width="1.8"/></svg>
+              Batch Adjust Plans
+            </button>
+            <button class="btn-primary-lg" style="font-size:13px;padding:9px 18px;" onclick="switchFlow('create')">+ Create New Funder</button>
+          </div>
         </div>
         <!-- filter bar -->
         <div class="list-filter">
@@ -2239,6 +2250,43 @@ function updateBulkBar() {
   document.getElementById('bulk-count').textContent = count;
   document.getElementById('bulk-names').textContent = Object.keys(selectedPlans).join(' · ');
   bar.classList.toggle('visible', count > 0);
+  // update toolbar hint + button state
+  const hint = document.getElementById('lib-select-hint');
+  const btnBatch = document.getElementById('btn-batch-adjust');
+  const countEl = document.getElementById('lib-select-count');
+  if (hint) hint.style.display = count > 0 ? 'block' : 'none';
+  if (countEl) countEl.textContent = count;
+  if (btnBatch) {
+    if (count > 0) {
+      btnBatch.style.color = '#2563EB';
+      btnBatch.style.borderColor = '#2563EB';
+      btnBatch.style.background = '#EFF6FF';
+    } else {
+      btnBatch.style.color = '#374151';
+      btnBatch.style.borderColor = '';
+      btnBatch.style.background = '';
+    }
+  }
+}
+
+function onBatchAdjustClick() {
+  const count = Object.keys(selectedPlans).length;
+  if (count === 0) {
+    // no selection: highlight the checkbox column as hint
+    const hint = document.getElementById('lib-select-hint');
+    if (hint) {
+      hint.style.display = 'block';
+      hint.style.color = '#D97706';
+      hint.innerHTML = '← Check the boxes in the table to select funders first';
+      setTimeout(() => {
+        hint.style.color = '#9CA3AF';
+        hint.innerHTML = '✓ <span id="lib-select-count">0</span> funder(s) selected — click "Batch Adjust Plans" to continue';
+        hint.style.display = 'none';
+      }, 2200);
+    }
+    return;
+  }
+  openBatchModal();
 }
 
 function clearAllSelections() {
