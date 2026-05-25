@@ -328,6 +328,15 @@ tr.drag-over { border-top: 2px solid #2563EB; }
 .hol-chk-label input:checked + .hol-chk-box::after { display:block; }
 .hol-chk-label:hover .hol-chk-box { border-color:#1677FF; }
 .hol-chk-label.locked { opacity:.4; pointer-events:none; }
+/* Tooltip */
+.tip { position:relative; display:inline-flex; align-items:center; cursor:help; color:#9CA3AF; font-size:12px; }
+.tip-box { display:none; position:absolute; bottom:calc(100% + 7px); left:50%; transform:translateX(-50%); background:#1E293B; color:#fff; font-size:11px; line-height:1.55; padding:7px 10px; border-radius:5px; width:220px; white-space:normal; z-index:400; pointer-events:none; font-weight:400; box-shadow:0 4px 12px rgba(0,0,0,.18); }
+.tip-box::after { content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:5px solid transparent; border-top-color:#1E293B; }
+.tip:hover .tip-box { display:block; }
+/* Offset-from select */
+.offset-from-sel { font-size:12px; border:1px solid #D1D5DB; border-radius:5px; padding:4px 6px; color:#374151; background:#fff; cursor:pointer; outline:none; max-width:130px; }
+.offset-from-sel:focus { border-color:#2563EB; }
+.offset-from-sel:disabled { background:#F9FAFB; color:#9CA3AF; cursor:default; }
 .hol-select-all { margin-bottom:5px; padding-bottom:5px; border-bottom:1px solid #F3F4F6; }
 /* Header Select All — brand green, 14×14, per spec */
 .hol-header-chk { display:inline-flex; align-items:center; gap:8px; cursor:pointer; user-select:none; line-height:1; vertical-align:middle; }
@@ -1141,7 +1150,7 @@ tr.drag-over { border-top: 2px solid #2563EB; }
               <span style="font-size:10px;background:#EFF6FF;color:#2563EB;padding:1px 6px;border-radius:3px;font-weight:600;">Phase 1</span>
             </label>
             <input class="form-input" type="date" id="first-batch-cutoff" oninput="recomputeSchedule()" style="width:180px;margin-top:4px;" />
-            <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">Cycle 1 milestone dates are calculated from this date. Leave blank to preview from today.</div>
+            <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">T for cycle 1. Milestone dates are calculated from this anchor.</div>
           </div>
 
           <!-- Revolving Start Date -->
@@ -1151,7 +1160,7 @@ tr.drag-over { border-top: 2px solid #2563EB; }
               <span style="font-size:10px;background:#F0FDF4;color:#15803D;padding:1px 6px;border-radius:3px;font-weight:600;">After first Sale</span>
             </label>
             <input class="form-input" type="date" id="revolving-start" style="width:180px;margin-top:4px;" />
-            <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">Start of revolving batch cycles. If First Batch Sale Date slips into the next cycle, Revolving Start shifts to the cycle after that.</div>
+            <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">Start of revolving cycles. Auto-shifts one cycle forward if First Batch Sale Date slips into the next cycle segment.</div>
           </div>
 
         </div>
@@ -1190,8 +1199,14 @@ tr.drag-over { border-top: 2px solid #2563EB; }
               <tr>
                 <th style="width:44px;">#</th>
                 <th>Milestone</th>
-                <th style="width:110px;">Type</th>
-                <th style="width:180px;">Offset (days from Cycle Start)</th>
+                <th style="width:100px;">Type</th>
+                <th style="width:150px;">Offset from</th>
+                <th style="width:160px;">
+                  <span style="display:inline-flex;align-items:center;gap:5px;">
+                    Offset (days)
+                    <span class="tip">ⓘ<span class="tip-box"><strong>T = cycle end date + 1</strong><br>The day after the current cycle's last day. Example: if cycle is Day 1–5, T = Day 6.</span></span>
+                  </span>
+                </th>
                 <th style="width:300px;">
   <label class="hol-header-chk" id="hol-header-lbl" aria-label="Select all holiday regions">
     <input type="checkbox" id="hol-select-all-header" checked onclick="onHolHeaderClick(this)">
@@ -1772,6 +1787,12 @@ tr.drag-over { border-top: 2px solid #2563EB; }
             <div class="ms-check-left"><span class="cal-chip" style="background:#CCFBF1;color:#0F766E;">Collection Deposit Date</span></div>
             <div style="width:80px;"><span class="ms-type-tag ms-type-operation">Operation</span></div>
             <div class="ms-check-delay"><input class="sp-delay-input" type="number" min="0" value="3" style="width:60px;" /><span style="font-size:12px;color:#9CA3AF;">days</span></div>
+          </div>
+
+          <!-- System milestone note -->
+          <div style="margin-top:12px;padding:8px 12px;background:#F9FAFB;border:1px solid #E5E7EB;border-radius:5px;font-size:11px;color:#6B7280;display:flex;gap:6px;">
+            <span>🔒</span>
+            <span>System milestones (Sys Cutoff, Sys Selling) recalculate automatically based on their preceding milestone. Manual adjustment is not available.</span>
           </div>
 
           <!-- Holiday calendar -->
@@ -2511,19 +2532,24 @@ function renderSpMilestoneTable(cycleNum) {
   const cycleStart = new Date((SP_CYCLE_STARTS[cycleNum] || '2026-05-19') + 'T00:00:00');
   const milestones = OPS_FLOW_MILESTONES['abs'];
   spModes = milestones.map(() => 'delay');
+  // serial chain dates
+  const chainDates = computeMilestoneDates(cycleStart, milestones);
 
   const tbody = document.getElementById('sp-milestone-tbody');
   tbody.innerHTML = milestones.map((m, i) => {
-    const origDate = new Date(cycleStart);
-    origDate.setDate(origDate.getDate() + m.offset);
-    const origStr = origDate.toISOString().slice(0,10);
+    const origDate = chainDates[i];
+    const origStr = origDate ? origDate.toISOString().slice(0,10) : '—';
     const isSystem = m.type === 'system';
+    const isTbd = m.offsetTbd;
     const rowBg = isSystem ? 'background:#F9FAFB;' : '';
     const typeBadge = isSystem
       ? `<span class="ms-type-tag ms-type-system">System</span>`
       : `<span class="ms-type-tag ms-type-operation">Operation</span>`;
-    const adjCell = isSystem
-      ? `<span style="color:#9CA3AF;font-size:12px;">—</span>`
+    const nameCell = m.indicative
+      ? `<span class="cal-chip" style="background:${m.bg};color:${m.color};border:1.5px dashed ${m.color};">${m.label}</span><span style="font-size:10px;color:#9CA3AF;margin-left:5px;vertical-align:middle;">indicative</span>`
+      : `<span class="cal-chip" style="background:${m.bg};color:${m.color};">${m.label}</span>`;
+    const adjCell = (isSystem || isTbd)
+      ? `<div style="display:flex;align-items:center;gap:5px;color:#9CA3AF;font-size:12px;"><span>🔒</span><span>— auto</span></div>`
       : `<div style="display:flex;align-items:center;gap:6px;">
            <div class="sp-adj-toggle">
              <button class="sp-adj-btn active" id="sp-btn-delay-${i}" onclick="setSpMode(${i},'delay')">+Xd</button>
@@ -2532,9 +2558,9 @@ function renderSpMilestoneTable(cycleNum) {
            <input class="sp-delay-input" id="sp-delay-${i}" type="number" min="0" placeholder="0" oninput="onSpDelayChange(${i},this)" />
            <input class="sp-date-input" id="sp-date-${i}" type="date" value="${origStr}" style="display:none;" oninput="onSpDateChange(${i},this)" />
          </div>`;
-    return '<tr style="' + rowBg + '" id="sp-row-' + i + '" data-orig="' + origStr + '" data-offset="' + m.offset + '">'
+    return '<tr style="' + rowBg + '" id="sp-row-' + i + '" data-orig="' + origStr + '" data-offset="' + (m.offset||0) + '">'
       + '<td style="padding:11px 16px;font-size:12px;color:#9CA3AF;">' + (i+1) + '</td>'
-      + '<td style="padding:11px 16px;"><span class="cal-chip" style="background:' + m.bg + ';color:' + m.color + ';">' + m.label + '</span></td>'
+      + '<td style="padding:11px 16px;">' + nameCell + '</td>'
       + '<td style="padding:11px 16px;">' + typeBadge + '</td>'
       + '<td style="padding:11px 16px;font-size:13px;color:#374151;" id="sp-orig-' + i + '">' + origStr + '</td>'
       + '<td style="padding:11px 16px;" colspan="2">' + adjCell + '</td>'
@@ -2861,13 +2887,13 @@ function selectPricing(card) {
 /* ── Ops Flow milestone definitions ── */
 const OPS_FLOW_MILESTONES = {
   'abs': [
-    { label: 'Servicer Report Date',    short: 'Servicer',    type: 'operation', offset: 0,  bg: '#DBEAFE', color: '#1D4ED8' },
-    { label: 'Batch Creation Date',     short: 'Batch',       type: 'operation', offset: 1,  bg: '#EDE9FE', color: '#6D28D9' },
-    { label: 'Sale Notice Date',        short: 'Sale Notice', type: 'operation', offset: 2,  bg: '#FEF3C7', color: '#92400E' },
-    { label: 'System Cutoff Date',      short: 'Sys Cutoff',  type: 'system',    offset: 3,  bg: '#F3F4F6', color: '#6B7280' },
-    { label: 'Sale Date',               short: 'Sale Date',   type: 'operation', offset: 4,  bg: '#D1FAE5', color: '#065F46', indicative: true },
-    { label: 'System Selling Date',     short: 'Sys Selling', type: 'system',    offset: 5,  bg: '#F3F4F6', color: '#6B7280' },
-    { label: 'Collection Deposit Date', short: 'Collection',  type: 'operation', offset: 7,  bg: '#CCFBF1', color: '#0F766E' },
+    { label: 'Servicer Report Date',    short: 'Servicer',    type: 'operation', offset: 0,  offsetFrom: 'T',         offsetRef: null, bg: '#DBEAFE', color: '#1D4ED8' },
+    { label: 'Batch Creation Date',     short: 'Batch',       type: 'operation', offset: 1,  offsetFrom: 'milestone', offsetRef: 1,    bg: '#EDE9FE', color: '#6D28D9' },
+    { label: 'Sale Notice Date',        short: 'Sale Notice', type: 'operation', offset: 1,  offsetFrom: 'milestone', offsetRef: 2,    bg: '#FEF3C7', color: '#92400E' },
+    { label: 'System Cutoff Date',      short: 'Sys Cutoff',  type: 'system',    offset: 3,  offsetFrom: 'milestone', offsetRef: 3,    bg: '#F3F4F6', color: '#6B7280' },
+    { label: 'Sale Date',               short: 'Sale Date',   type: 'operation', offset: 7,  offsetFrom: 'milestone', offsetRef: 4,    bg: '#D1FAE5', color: '#065F46', indicative: true },
+    { label: 'System Selling Date',     short: 'Sys Selling', type: 'system',    offset: 1,  offsetFrom: 'milestone', offsetRef: 5,    bg: '#F3F4F6', color: '#6B7280' },
+    { label: 'Collection Deposit Date', short: 'Collection',  type: 'operation', offset: 0,  offsetFrom: 'milestone', offsetRef: 5,    bg: '#CCFBF1', color: '#0F766E', offsetTbd: true },
   ],
   'abs-net': [
     { label: 'Servicer Report Date',    short: 'Servicer',    type: 'operation', offset: 0,  bg: '#DBEAFE', color: '#1D4ED8' },
@@ -2917,31 +2943,67 @@ function renderMilestoneTable(type) {
     const typeBadge = isSystem
       ? `<span class="ms-type-tag ms-type-system">System</span>`
       : `<span class="ms-type-tag ms-type-operation">Operation</span>`;
+
+    // Offset from cell
+    const offsetFromOptions = ['<option value="T"' + (m.offsetFrom === 'T' ? ' selected' : '') + '>T</option>']
+      .concat(milestones.slice(0, i).map((_, j) =>
+        `<option value="${j+1}"${m.offsetFrom === 'milestone' && m.offsetRef === j+1 ? ' selected' : ''}>Milestone ${j+1}</option>`
+      )).join('');
+    const offsetFromCell = isSystem
+      ? `<div style="display:flex;align-items:center;gap:5px;color:#9CA3AF;font-size:12px;">
+           <span style="font-size:13px;">🔒</span>
+           <span>${m.offsetFrom === 'T' ? 'T' : 'Milestone ' + m.offsetRef}</span>
+         </div>`
+      : (i === 0
+          ? `<span style="font-size:12px;font-weight:600;color:#374151;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:4px;padding:2px 8px;">T</span>`
+          : `<select class="offset-from-sel" onchange="onOffsetFromChange(${i},this)">${offsetFromOptions}</select>`);
+
+    // Offset (days) cell
     const offsetCell = isSystem
-      ? `<span style="color:#9CA3AF;font-size:13px;">+${m.offset}d &nbsp;<span style="font-size:11px;font-weight:500;">auto</span></span>`
-      : `<div style="display:flex;align-items:center;gap:6px;"><span style="font-size:12px;color:#9CA3AF;">+</span><input class="ms-offset-input" type="number" value="${m.offset}" min="0" onchange="onOffsetChange(${i},this)" /><span style="font-size:12px;color:#9CA3AF;">days</span></div>`;
+      ? `<div style="display:flex;align-items:center;gap:5px;">
+           <span style="font-size:13px;">🔒</span>
+           <span style="color:#9CA3AF;font-size:13px;">+${m.offset}d <span style="font-size:11px;">auto</span></span>
+         </div>`
+      : m.offsetTbd
+        ? `<span style="font-size:12px;color:#9CA3AF;font-style:italic;">TBD</span>`
+        : `<div style="display:flex;align-items:center;gap:6px;">
+             <span style="font-size:12px;color:#9CA3AF;">+</span>
+             <input class="ms-offset-input" type="number" value="${m.offset}" min="0" onchange="onOffsetChange(${i},this)" />
+             <span style="font-size:12px;color:#9CA3AF;">days</span>
+           </div>`;
+
+    // Holiday checkboxes
     const holRegions = [
-      { code:'TH', label:'Thailand (TH)' },
-      { code:'MY', label:'Malaysia (MY)' },
-      { code:'SG', label:'Singapore (SG)' },
-      { code:'HK', label:'Hong Kong (HK)' },
+      { code:'TH', label:'Thailand (TH)' }, { code:'MY', label:'Malaysia (MY)' },
+      { code:'SG', label:'Singapore (SG)' }, { code:'HK', label:'Hong Kong (HK)' },
       { code:'US', label:'United States (US)' },
     ];
     const uid = 'ms_' + i;
     const holCell = `<div class="hol-chk-group">${holRegions.map((r, ri) =>
         `<label class="hol-chk-label"><input type="checkbox" id="${uid}_${ri}" name="hol-all" checked onchange="updateHolHeaderAll()"><span class="hol-chk-box"></span>${r.label}</label>`
       ).join('')}</div>`;
+
     const milestoneCell = m.indicative
       ? `<span class="cal-chip" style="background:${m.bg};color:${m.color};">${m.label}</span><span style="margin-left:6px;font-size:10px;color:#9CA3AF;background:#F3F4F6;border-radius:3px;padding:1px 5px;vertical-align:middle;">indicative</span>`
       : `<span class="cal-chip" style="background:${m.bg};color:${m.color};">${m.label}</span>`;
+
     return `<tr style="${rowStyle}">
       <td style="color:#9CA3AF;font-size:12px;padding-left:20px;">${i + 1}</td>
-      <td>${milestoneCell}</td>
-      <td>${typeBadge}</td>
+      <td style="padding:10px 14px;">${milestoneCell}</td>
+      <td style="padding:10px 14px;">${typeBadge}</td>
+      <td style="padding:10px 14px;">${offsetFromCell}</td>
       <td style="padding:10px 14px;">${offsetCell}</td>
       <td style="padding:10px 14px;">${holCell}</td>
     </tr>`;
   }).join('');
+}
+
+function onOffsetFromChange(idx, sel) {
+  const v = sel.value;
+  const m = OPS_FLOW_MILESTONES[currentOpsFlow][idx];
+  if (v === 'T') { m.offsetFrom = 'T'; m.offsetRef = null; }
+  else { m.offsetFrom = 'milestone'; m.offsetRef = parseInt(v, 10); }
+  recomputeSchedule();
 }
 
 function onHolHeaderClick(masterChk) {
@@ -2963,6 +3025,23 @@ function updateHolHeaderAll() {
   master.checked = n === all.length;
   // WCAG 2.1: indeterminate must be set via JS property, not CSS alone
   // (already done above via master.indeterminate = true)
+}
+
+/* Serial chain: compute each milestone date relative to its offsetFrom anchor */
+function computeMilestoneDates(T, milestones) {
+  const dates = [];
+  milestones.forEach((m, i) => {
+    if (m.offsetTbd) { dates.push(null); return; }
+    let ref;
+    if (!m.offsetFrom || m.offsetFrom === 'T' || !m.offsetRef) {
+      ref = new Date(T);
+    } else {
+      ref = dates[m.offsetRef - 1] ? new Date(dates[m.offsetRef - 1]) : new Date(T);
+    }
+    ref.setDate(ref.getDate() + (m.offset || 0));
+    dates.push(ref);
+  });
+  return dates;
 }
 
 function onOffsetChange(idx, input) {
@@ -3169,17 +3248,18 @@ function renderCalendar() {
   const intervalDays = getCycleIntervalDays();
   const twoYears = 365 * 2;
 
-  // build date → milestones map across ALL cycles for 2 years
+  // build date → milestones map across ALL cycles for 2 years (serial chain)
+  const milestones = OPS_FLOW_MILESTONES[currentOpsFlow] || [];
   const dateMap = {};
   for (let cycleOffset = 0; cycleOffset <= twoYears; cycleOffset += intervalDays) {
     const cycleStart = new Date(anchor);
     cycleStart.setDate(cycleStart.getDate() + cycleOffset);
-    (OPS_FLOW_MILESTONES[currentOpsFlow] || []).forEach(m => {
-      const d = new Date(cycleStart);
-      d.setDate(d.getDate() + m.offset);
+    const dates = computeMilestoneDates(cycleStart, milestones);
+    dates.forEach((d, idx) => {
+      if (!d) return;
+      const m = milestones[idx];
       const key = d.toISOString().slice(0, 10);
       if (!dateMap[key]) dateMap[key] = [];
-      // avoid duplicates when two milestones land on the same date in the same cycle
       const alreadyHas = dateMap[key].some(x => x.label === m.label);
       if (!alreadyHas) dateMap[key].push(m);
     });
@@ -3189,14 +3269,17 @@ function renderCalendar() {
   const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   document.getElementById('cal-month-label').textContent = monthNames[calViewMonth] + ' ' + calViewYear;
 
-  // legend
+  // legend — use serial chain dates
   const legend = document.getElementById('cal-legend');
-  const milestoneLegend = (OPS_FLOW_MILESTONES[currentOpsFlow] || []).map(m => {
-    const d = new Date(anchor); d.setDate(d.getDate() + m.offset);
-    const dateStr = d.toISOString().slice(0,10);
+  const legendDates = computeMilestoneDates(anchor, milestones);
+  const milestoneLegend = milestones.map((m, idx) => {
+    const d = legendDates[idx];
+    const dateStr = d ? d.toISOString().slice(0,10) : '—';
+    const chipStyle = m.type === 'system' ? 'opacity:0.65;' : '';
+    const indicBadge = m.indicative ? `<span style="font-size:9px;color:#9CA3AF;margin-left:3px;">indicative</span>` : '';
     return `<div style="display:flex;align-items:center;gap:5px;">
-      <span class="cal-chip" style="background:${m.bg};color:${m.color};">${m.short}</span>
-      <span style="font-size:11px;color:#6B7280;">${dateStr}</span>
+      <span class="cal-chip" style="background:${m.bg};color:${m.color};${chipStyle}${m.indicative?'border:1.5px dashed '+m.color+';':''}">${m.short}</span>
+      <span style="font-size:11px;color:#6B7280;">${dateStr}</span>${indicBadge}
     </div>`;
   }).join('');
   // holiday legend entry
