@@ -328,9 +328,19 @@ tr.drag-over { border-top: 2px solid #2563EB; }
 .hol-chk-label input:checked + .hol-chk-box::after { display:block; }
 .hol-chk-label:hover .hol-chk-box { border-color:#1677FF; }
 .hol-chk-label.locked { opacity:.4; pointer-events:none; }
-.hol-chk-label input:indeterminate + .hol-chk-box { background:#1677FF; border-color:#1677FF; }
-.hol-chk-label input:indeterminate + .hol-chk-box::after { display:block; width:7px; height:0; border:0; border-top:2px solid #fff; transform:none; margin:auto; }
 .hol-select-all { margin-bottom:5px; padding-bottom:5px; border-bottom:1px solid #F3F4F6; }
+/* Header Select All — brand green, 14×14, per spec */
+.hol-header-chk { display:inline-flex; align-items:center; gap:8px; cursor:pointer; user-select:none; line-height:1; vertical-align:middle; }
+.hol-header-chk input[type="checkbox"] { display:none; }
+.hol-header-chk-box { width:14px; height:14px; border:1.5px solid #D9D9D9; border-radius:3px; background:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .15s; }
+/* checked — green fill + checkmark */
+.hol-header-chk input:checked + .hol-header-chk-box { background:#1D9E75; border-color:#1D9E75; }
+.hol-header-chk-box::after { content:''; display:none; }
+.hol-header-chk input:checked + .hol-header-chk-box::after { display:block; width:4px; height:7px; border:1.5px solid #fff; border-top:none; border-left:none; transform:rotate(45deg) translateY(-1px); }
+/* indeterminate — green fill + horizontal dash */
+.hol-header-chk input:indeterminate + .hol-header-chk-box { background:#1D9E75; border-color:#1D9E75; }
+.hol-header-chk input:indeterminate + .hol-header-chk-box::after { display:block; width:8px; height:2px; background:#fff; border-radius:1px; }
+.hol-header-chk:hover .hol-header-chk-box { border-color:#1D9E75; }
 /* Holiday calendar cells */
 .cal-day.is-holiday { background:#FFF7F0; }
 .cal-holiday-lbl { font-size:9px; color:#D97706; background:#FEF3C7; border-radius:3px; padding:1px 4px; margin-bottom:2px; display:inline-block; }
@@ -1144,14 +1154,11 @@ tr.drag-over { border-top: 2px solid #2563EB; }
                 <th style="width:110px;">Type</th>
                 <th style="width:180px;">Offset (days from Cycle Start)</th>
                 <th style="width:300px;">
-  <div style="display:flex;align-items:center;gap:8px;">
-    <span>Skip Holidays of</span>
-    <label class="hol-chk-label" style="font-size:11px;color:#6B7280;font-weight:400;">
-      <input type="checkbox" id="hol-select-all-header" checked onchange="toggleAllHolidays(this)">
-      <span class="hol-chk-box" style="width:13px;height:13px;"></span>
-      Select All
-    </label>
-  </div>
+  <label class="hol-header-chk" id="hol-header-lbl" aria-label="Select all holiday regions">
+    <input type="checkbox" id="hol-select-all-header" checked onclick="onHolHeaderClick(this)">
+    <span class="hol-header-chk-box"></span>
+    <span style="font-weight:600;color:#374151;">Skip Holidays of</span>
+  </label>
 </th>
               </tr>
             </thead>
@@ -2893,8 +2900,15 @@ function renderMilestoneTable(type) {
   }).join('');
 }
 
-function toggleAllHolidays(masterChk) {
-  document.querySelectorAll('input[name="hol-all"]').forEach(c => { c.checked = masterChk.checked; });
+function onHolHeaderClick(masterChk) {
+  // indeterminate OR unchecked → select all; all checked → deselect all
+  const all = document.querySelectorAll('input[name="hol-all"]');
+  const allChecked = Array.from(all).every(c => c.checked);
+  const newVal = !allChecked; // all-checked → deselect; anything else → select
+  // prevent browser's native toggle from fighting us
+  masterChk.checked = newVal;
+  masterChk.indeterminate = false;
+  all.forEach(c => { c.checked = newVal; });
 }
 function updateHolHeaderAll() {
   const all = document.querySelectorAll('input[name="hol-all"]');
@@ -2903,6 +2917,8 @@ function updateHolHeaderAll() {
   if (!master) return;
   master.indeterminate = n > 0 && n < all.length;
   master.checked = n === all.length;
+  // WCAG 2.1: indeterminate must be set via JS property, not CSS alone
+  // (already done above via master.indeterminate = true)
 }
 
 function onOffsetChange(idx, input) {
