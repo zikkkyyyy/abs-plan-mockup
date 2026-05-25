@@ -328,6 +328,12 @@ tr.drag-over { border-top: 2px solid #2563EB; }
 .hol-chk-label input:checked + .hol-chk-box::after { display:block; }
 .hol-chk-label:hover .hol-chk-box { border-color:#1677FF; }
 .hol-chk-label.locked { opacity:.4; pointer-events:none; }
+.hol-chk-label input:indeterminate + .hol-chk-box { background:#1677FF; border-color:#1677FF; }
+.hol-chk-label input:indeterminate + .hol-chk-box::after { display:block; width:7px; height:0; border:0; border-top:2px solid #fff; transform:none; margin:auto; }
+.hol-select-all { margin-bottom:5px; padding-bottom:5px; border-bottom:1px solid #F3F4F6; }
+/* Holiday calendar cells */
+.cal-day.is-holiday { background:#FFF7F0; }
+.cal-holiday-lbl { font-size:9px; color:#D97706; background:#FEF3C7; border-radius:3px; padding:1px 4px; margin-bottom:2px; display:inline-block; }
 
 /* ── Milestone offset number input ── */
 .ms-offset-input { width: 70px; border: 1px solid #D1D5DB; border-radius: 5px; padding: 5px 8px; font-size: 13px; color: #374151; text-align: center; outline: none; }
@@ -2858,18 +2864,25 @@ function renderMilestoneTable(type) {
       ? `<span style="color:#9CA3AF;font-size:13px;">+${m.offset}d &nbsp;<span style="font-size:11px;font-weight:500;">auto</span></span>`
       : `<div style="display:flex;align-items:center;gap:6px;"><span style="font-size:12px;color:#9CA3AF;">+</span><input class="ms-offset-input" type="number" value="${m.offset}" min="0" onchange="onOffsetChange(${i},this)" /><span style="font-size:12px;color:#9CA3AF;">days</span></div>`;
     const holRegions = [
-      { code:'TH', label:'Thailand (TH)', checked: true },
-      { code:'MY', label:'Malaysia (MY)', checked: false },
-      { code:'SG', label:'Singapore (SG)', checked: false },
-      { code:'HK', label:'Hong Kong (HK)', checked: false },
-      { code:'US', label:'United States (US)', checked: false },
+      { code:'TH', label:'Thailand (TH)' },
+      { code:'MY', label:'Malaysia (MY)' },
+      { code:'SG', label:'Singapore (SG)' },
+      { code:'HK', label:'Hong Kong (HK)' },
+      { code:'US', label:'United States (US)' },
     ];
     const uid = 'ms_' + i;
     const holCell = isSystem
       ? `<span style="color:#D1D5DB;font-size:13px;">—</span>`
-      : `<div class="hol-chk-group">${holRegions.map((r, ri) =>
-          `<label class="hol-chk-label"><input type="checkbox" id="${uid}_${ri}"${r.checked?' checked':''}><span class="hol-chk-box"></span>${r.label}</label>`
-        ).join('')}</div>`;
+      : `<div>
+          <label class="hol-chk-label hol-select-all">
+            <input type="checkbox" id="${uid}_all" checked onchange="toggleHolAll('${uid}',this)">
+            <span class="hol-chk-box"></span>
+            <span style="font-size:11px;color:#6B7280;font-weight:600;">Select All</span>
+          </label>
+          <div class="hol-chk-group">${holRegions.map((r, ri) =>
+            `<label class="hol-chk-label"><input type="checkbox" id="${uid}_${ri}" name="${uid}" checked onchange="updateHolSelectAll('${uid}')"><span class="hol-chk-box"></span>${r.label}</label>`
+          ).join('')}</div>
+        </div>`;
     return `<tr style="${rowStyle}">
       <td style="color:#9CA3AF;font-size:12px;padding-left:20px;">${i + 1}</td>
       <td><span class="cal-chip" style="background:${m.bg};color:${m.color};">${m.label}</span></td>
@@ -2880,6 +2893,18 @@ function renderMilestoneTable(type) {
   }).join('');
 }
 
+function toggleHolAll(uid, masterChk) {
+  document.querySelectorAll(`input[name="${uid}"]`).forEach(c => { c.checked = masterChk.checked; });
+}
+function updateHolSelectAll(uid) {
+  const all = document.querySelectorAll(`input[name="${uid}"]`);
+  const n = Array.from(all).filter(c => c.checked).length;
+  const master = document.getElementById(uid + '_all');
+  if (!master) return;
+  master.indeterminate = n > 0 && n < all.length;
+  master.checked = n === all.length;
+}
+
 function onOffsetChange(idx, input) {
   const val = parseInt(input.value, 10);
   if (isNaN(val) || val < 0) { input.value = 0; return; }
@@ -2888,6 +2913,24 @@ function onOffsetChange(idx, input) {
 }
 
 /* ── Cycle segments ── */
+/* Sample holiday dates (TH + MY) for calendar preview */
+const HOLIDAY_DATES = new Set([
+  '2026-05-01', // Labour Day (TH/MY)
+  '2026-05-11', // Visakha Bucha Day substitute (TH)
+  '2026-06-01', // Yang di-Pertuan Agong's Birthday (MY)
+  '2026-06-03', // H.M. King Coronation Day (TH)
+  '2026-07-06', // Asahna Bucha Day (TH)
+  '2026-08-12', // HM Queen Mother's Birthday (TH)
+]);
+const HOLIDAY_LABELS = {
+  '2026-05-01': 'Labour Day',
+  '2026-05-11': 'Visakha Bucha',
+  '2026-06-01': "Agong's Birthday",
+  '2026-06-03': 'Coronation Day',
+  '2026-07-06': 'Asahna Bucha',
+  '2026-08-12': "Queen's Birthday",
+};
+
 const SEG_COLORS = ['#2563EB','#7C3AED','#0891B2','#059669','#D97706','#DC2626','#6B7280'];
 let cycleSegments = [
   { from: 1,  to: 5,   eom: false },
@@ -3113,23 +3156,33 @@ function renderCalendar() {
 
     const chips = dateMap[dateKey] || [];
     const isAnchor = dateKey === anchorKey;
+    const isHoliday = !isOther && HOLIDAY_DATES.has(dateKey);
 
     const cell = document.createElement('div');
     cell.className = 'cal-day' +
       (isOther ? ' other-month' : '') +
       (chips.length ? ' has-milestone' : '') +
-      (isAnchor ? ' is-anchor' : '');
+      (isAnchor ? ' is-anchor' : '') +
+      (isHoliday ? ' is-holiday' : '');
 
     const numEl = document.createElement('div');
     numEl.className = 'cal-day-num';
     numEl.textContent = dayNum;
     cell.appendChild(numEl);
 
+    if (isHoliday) {
+      const hlbl = document.createElement('div');
+      hlbl.className = 'cal-holiday-lbl';
+      hlbl.textContent = HOLIDAY_LABELS[dateKey] || 'Holiday';
+      cell.appendChild(hlbl);
+    }
+
     chips.forEach(m => {
       const chip = document.createElement('div');
       chip.className = 'cal-chip';
       chip.style.background = m.bg;
       chip.style.color = m.color;
+      chip.style.opacity = isHoliday ? '0.45' : '1';
       chip.textContent = m.short;
       cell.appendChild(chip);
     });
