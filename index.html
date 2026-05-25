@@ -3116,7 +3116,7 @@ function renderCalendar() {
 
   // legend
   const legend = document.getElementById('cal-legend');
-  legend.innerHTML = (OPS_FLOW_MILESTONES[currentOpsFlow] || []).map(m => {
+  const milestoneLegend = (OPS_FLOW_MILESTONES[currentOpsFlow] || []).map(m => {
     const d = new Date(anchor); d.setDate(d.getDate() + m.offset);
     const dateStr = d.toISOString().slice(0,10);
     return `<div style="display:flex;align-items:center;gap:5px;">
@@ -3124,6 +3124,12 @@ function renderCalendar() {
       <span style="font-size:11px;color:#6B7280;">${dateStr}</span>
     </div>`;
   }).join('');
+  // holiday legend entry
+  const holidayLegend = `<div style="display:flex;align-items:center;gap:5px;margin-left:4px;padding-left:10px;border-left:1px solid #E5E7EB;">
+    <span style="display:inline-block;width:12px;height:12px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:2px;flex-shrink:0;"></span>
+    <span style="font-size:11px;color:#92400E;font-weight:500;">Holiday</span>
+  </div>`;
+  legend.innerHTML = milestoneLegend + holidayLegend;
 
   // grid days
   const grid = document.getElementById('cal-grid');
