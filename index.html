@@ -204,6 +204,14 @@ tbody tr:hover { background: #FAFAFA; }
 .tbl-act-link:first-child { padding-left: 0; }
 .tbl-act-link:hover { text-decoration: underline; color: #1D4ED8; }
 .tbl-act-link.danger { color: #DC2626; }
+/* More dropdown */
+.more-dd-wrap { position:relative; display:inline-block; }
+.more-dd-menu { display:none; position:absolute; right:0; top:100%; margin-top:4px; background:#fff; border:1px solid #E5E7EB; border-radius:6px; box-shadow:0 4px 12px rgba(0,0,0,.1); z-index:200; min-width:130px; padding:4px 0; }
+.more-dd-wrap.open .more-dd-menu { display:block; }
+.more-dd-item { display:block; width:100%; padding:7px 14px; font-size:12px; color:#374151; cursor:pointer; background:none; border:none; text-align:left; font-family:inherit; white-space:nowrap; }
+.more-dd-item:hover { background:#F9FAFB; color:#111827; }
+.more-dd-item.danger { color:#DC2626; }
+.more-dd-item.danger:hover { background:#FEF2F2; }
 .tbl-act-sep { color: #D1D5DB; font-size: 12px; }
 .status-live { color: #16A34A; font-size: 12px; font-weight: 500; }
 .status-pending { color: #D97706; font-size: 12px; font-weight: 500; }
@@ -785,25 +793,37 @@ tr.drag-over { border-top: 2px solid #2563EB; }
       </div>
     </div>
 
-    <!-- Funder Fee Config -->
-    <div class="section-card">
+    <!-- EC / PC Rules — locked (Phase 2) -->
+    <div class="section-card" style="opacity:.6;">
       <div class="section-header" style="display:flex;align-items:center;justify-content:space-between;">
-        <div class="section-title">Funder Fee Config</div>
-        <button class="btn-outline-sm">+ Add Fee</button>
-      </div>
-      <div class="section-body" style="padding:0;">
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr>
-              <th>Fee Type</th><th>Tenor</th><th>Target Group</th>
-              <th>Value &amp; Effective Time</th><th>Update By</th><th>Operation</th>
-            </tr></thead>
-            <tbody>
-              <tr><td colspan="6"><div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">No data</div></div></td></tr>
-            </tbody>
-          </table>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="section-title" style="margin:0;">EC / PC Rules</div>
+          <span style="font-size:11px;background:#F3F4F6;color:#6B7280;border:1px solid #E5E7EB;border-radius:4px;padding:2px 7px;font-weight:600;">🔒 Phase 2</span>
         </div>
       </div>
+      <div class="section-body" style="color:#9CA3AF;font-size:13px;">Not configurable in this phase. Will be supported in Phase 2.</div>
+    </div>
+
+    <!-- Loan Selection Strategy — locked (Phase 2) -->
+    <div class="section-card" style="opacity:.6;">
+      <div class="section-header" style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="section-title" style="margin:0;">Loan Selection Strategy</div>
+          <span style="font-size:11px;background:#F3F4F6;color:#6B7280;border:1px solid #E5E7EB;border-radius:4px;padding:2px 7px;font-weight:600;">🔒 Phase 2</span>
+        </div>
+      </div>
+      <div class="section-body" style="color:#9CA3AF;font-size:13px;">Not configurable in this phase. Will be supported in Phase 2.</div>
+    </div>
+
+    <!-- Issue Size — locked (Phase 2) -->
+    <div class="section-card" style="opacity:.6;">
+      <div class="section-header" style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="section-title" style="margin:0;">Issue Size</div>
+          <span style="font-size:11px;background:#F3F4F6;color:#6B7280;border:1px solid #E5E7EB;border-radius:4px;padding:2px 7px;font-weight:600;">🔒 Phase 2</span>
+        </div>
+      </div>
+      <div class="section-body" style="color:#9CA3AF;font-size:13px;">Not configurable in this phase. Will be supported in Phase 2.</div>
     </div>
 
     <div class="footer-nav">
@@ -1447,7 +1467,7 @@ tr.drag-over { border-top: 2px solid #2563EB; }
         </div>
         <!-- filter bar -->
         <div class="list-filter">
-          <select class="form-select" style="width:160px;"><option>Status: All</option><option>ACTIVE</option><option>INACTIVE</option><option>DRAFT</option></select>
+          <select class="form-select" style="width:160px;"><option>Status: All</option><option>DRAFT</option><option>PENDING</option><option>ACTIVE</option><option>INACTIVE</option></select>
           <select class="form-select" style="width:160px;"><option>Scheme: All</option><option>ABS</option><option>ABL</option><option>YBL</option><option>Channeling</option></select>
           <input class="form-input" style="width:220px;" placeholder="🔍  Search funder name…" />
           <button class="btn-outline-sm" style="padding:7px 14px;">Reset</button>
@@ -1532,21 +1552,29 @@ tr.drag-over { border-top: 2px solid #2563EB; }
                 <td style="padding:11px 10px 11px 16px;"><input type="checkbox" class="row-chk" onchange="onRowCheck(this,'TH_MND_SPL_ABS_01_2024','ABL')" /></td>
                 <td class="num-col">7</td><td class="num-col">1061001</td>
                 <td style="font-weight:500;">TH_MND_SPL_ABS_01_2024</td>
-                <td><span class="status-badge" style="background:#F3F4F6;color:#6B7280;">—</span></td>
+                <td><span class="status-badge" style="background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;">DRAFT</span></td>
                 <td><span style="font-size:11px;font-weight:600;color:#6B7280;background:#F3F4F6;padding:2px 7px;border-radius:4px;">ABL</span></td>
                 <td><span class="scheme-badge" style="background:#F3F4F6;color:#6B7280;">ABL</span></td>
                 <td style="color:#9CA3AF;font-size:12px;">2024-11-18 16:41:53</td>
-                <td><div class="tbl-actions"><button class="tbl-act-link">View</button><span class="tbl-act-sep">|</span><button class="tbl-act-link">Edit</button><span class="tbl-act-sep">|</span><button class="tbl-act-link">More ▾</button></div></td>
+                <td><div class="tbl-actions"><button class="tbl-act-link">View</button><span class="tbl-act-sep">|</span><button class="tbl-act-link">Edit</button><span class="tbl-act-sep">|</span>
+                  <div class="more-dd-wrap" id="more-7"><button class="tbl-act-link" onclick="toggleMoreDD('more-7',event)">More ▾</button>
+                    <div class="more-dd-menu"><button class="more-dd-item" onclick="showConfirmPopup('Activate','TH_MND_SPL_ABS_01_2024')">Activate</button></div>
+                  </div>
+                </div></td>
               </tr>
               <tr id="lrow-8">
                 <td style="padding:11px 10px 11px 16px;"><input type="checkbox" class="row-chk" onchange="onRowCheck(this,'TH_SPL_SPL_01','ABL')" /></td>
                 <td class="num-col">8</td><td class="num-col">1085111</td>
                 <td style="font-weight:500;">TH_SPL_SPL_01</td>
-                <td><span class="status-badge" style="background:#F3F4F6;color:#6B7280;">—</span></td>
+                <td><span class="status-badge" style="background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;">DRAFT</span></td>
                 <td><span style="font-size:11px;font-weight:600;color:#6B7280;background:#F3F4F6;padding:2px 7px;border-radius:4px;">ABL</span></td>
                 <td><span class="scheme-badge" style="background:#F3F4F6;color:#6B7280;">ABL</span></td>
                 <td style="color:#9CA3AF;font-size:12px;">2024-11-19 17:40:48</td>
-                <td><div class="tbl-actions"><button class="tbl-act-link">View</button><span class="tbl-act-sep">|</span><button class="tbl-act-link">Edit</button><span class="tbl-act-sep">|</span><button class="tbl-act-link">More ▾</button></div></td>
+                <td><div class="tbl-actions"><button class="tbl-act-link">View</button><span class="tbl-act-sep">|</span><button class="tbl-act-link">Edit</button><span class="tbl-act-sep">|</span>
+                  <div class="more-dd-wrap" id="more-8"><button class="tbl-act-link" onclick="toggleMoreDD('more-8',event)">More ▾</button>
+                    <div class="more-dd-menu"><button class="more-dd-item" onclick="showConfirmPopup('Activate','TH_SPL_SPL_01')">Activate</button></div>
+                  </div>
+                </div></td>
               </tr>
               <!-- Starlight -->
               <tr id="lrow-9" style="background:#FFFBEB;">
@@ -1560,7 +1588,9 @@ tr.drag-over { border-top: 2px solid #2563EB; }
                 <td><div class="tbl-actions">
                   <button class="tbl-act-link" onclick="switchFlow('view')">View</button><span class="tbl-act-sep">|</span>
                   <button class="tbl-act-link" onclick="switchFlow('create')">Edit</button><span class="tbl-act-sep">|</span>
-                  <button class="tbl-act-link">More ▾</button>
+                  <div class="more-dd-wrap" id="more-9"><button class="tbl-act-link" onclick="toggleMoreDD('more-9',event)">More ▾</button>
+                    <div class="more-dd-menu"><button class="more-dd-item danger" onclick="showConfirmPopup('Revert','TH_SPL_Starlight_ABS_01')">Revert to Draft</button></div>
+                  </div>
                 </div></td>
               </tr>
             </tbody>
@@ -1702,6 +1732,25 @@ tr.drag-over { border-top: 2px solid #2563EB; }
           <button class="btn-outline-sm" style="padding:9px 18px;" onclick="document.getElementById('batch-modal').classList.remove('open')">Cancel</button>
           <button class="btn-primary-lg" style="padding:9px 20px;font-size:13px;" onclick="submitBatchAdjust()">Submit to TC →</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Action Popup -->
+  <div class="modal-overlay" id="confirm-action-popup">
+    <div class="modal" style="width:420px;">
+      <div class="modal-header">
+        <div class="modal-title" id="confirm-action-title">Are you sure to activate this funder?</div>
+        <button class="modal-close" onclick="document.getElementById('confirm-action-popup').classList.remove('open')">✕</button>
+      </div>
+      <div class="modal-body" style="padding:16px 24px 20px;">
+        <div style="font-size:13px;color:#6B7280;margin-bottom:4px;">Funder</div>
+        <div style="font-size:14px;font-weight:600;color:#111827;" id="confirm-action-body"></div>
+        <div style="font-size:12px;color:#9CA3AF;margin-top:8px;">This will create a Ticket Center approval request. The status will update once the ticket is approved.</div>
+      </div>
+      <div class="modal-footer" style="display:flex;justify-content:flex-end;gap:10px;padding:12px 24px;">
+        <button class="btn-outline-sm" style="padding:8px 18px;" onclick="document.getElementById('confirm-action-popup').classList.remove('open')">No</button>
+        <button class="btn-primary-lg" style="font-size:13px;padding:8px 18px;" onclick="confirmAction()">Yes</button>
       </div>
     </div>
   </div>
@@ -2248,6 +2297,41 @@ function updateSelectAll() {
   if (!master) return;
   master.indeterminate = checked.length > 0 && checked.length < all.length;
   master.checked = checked.length === all.length && all.length > 0;
+}
+
+/* ── More dropdown ── */
+function toggleMoreDD(id, e) {
+  e.stopPropagation();
+  const wrap = document.getElementById(id);
+  const isOpen = wrap.classList.contains('open');
+  // close all open dropdowns first
+  document.querySelectorAll('.more-dd-wrap.open').forEach(w => w.classList.remove('open'));
+  if (!isOpen) wrap.classList.add('open');
+}
+document.addEventListener('click', () => {
+  document.querySelectorAll('.more-dd-wrap.open').forEach(w => w.classList.remove('open'));
+});
+
+function showConfirmPopup(action, funderName) {
+  document.querySelectorAll('.more-dd-wrap.open').forEach(w => w.classList.remove('open'));
+  const popup = document.getElementById('confirm-action-popup');
+  const title = document.getElementById('confirm-action-title');
+  const body = document.getElementById('confirm-action-body');
+  const isRevert = action === 'Revert';
+  title.textContent = `Are you sure to ${isRevert ? 'revert' : 'activate'} this funder?`;
+  body.textContent = funderName;
+  popup.classList.add('open');
+  popup._action = action;
+  popup._funder = funderName;
+}
+
+function confirmAction() {
+  const popup = document.getElementById('confirm-action-popup');
+  popup.classList.remove('open');
+  const toast = document.getElementById('update-toast');
+  toast.textContent = `✓ ${popup._funder} — ${popup._action} request submitted to Ticket Center`;
+  toast.classList.add('visible');
+  setTimeout(() => toast.classList.remove('visible'), 2800);
 }
 
 function updateBulkBar() {
