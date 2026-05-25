@@ -2880,11 +2880,9 @@ function renderMilestoneTable(type) {
       { code:'US', label:'United States (US)' },
     ];
     const uid = 'ms_' + i;
-    const holCell = isSystem
-      ? `<span style="color:#D1D5DB;font-size:13px;">—</span>`
-      : `<div class="hol-chk-group">${holRegions.map((r, ri) =>
-          `<label class="hol-chk-label"><input type="checkbox" id="${uid}_${ri}" name="hol-all" checked onchange="updateHolHeaderAll()"><span class="hol-chk-box"></span>${r.label}</label>`
-        ).join('')}</div>`;
+    const holCell = `<div class="hol-chk-group">${holRegions.map((r, ri) =>
+        `<label class="hol-chk-label"><input type="checkbox" id="${uid}_${ri}" name="hol-all" checked onchange="updateHolHeaderAll()"><span class="hol-chk-box"></span>${r.label}</label>`
+      ).join('')}</div>`;
     return `<tr style="${rowStyle}">
       <td style="color:#9CA3AF;font-size:12px;padding-left:20px;">${i + 1}</td>
       <td><span class="cal-chip" style="background:${m.bg};color:${m.color};">${m.label}</span></td>
