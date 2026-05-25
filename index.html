@@ -1143,7 +1143,16 @@ tr.drag-over { border-top: 2px solid #2563EB; }
                 <th>Milestone</th>
                 <th style="width:110px;">Type</th>
                 <th style="width:180px;">Offset (days from Cycle Start)</th>
-                <th style="width:300px;">Skip Holidays of</th>
+                <th style="width:300px;">
+  <div style="display:flex;align-items:center;gap:8px;">
+    <span>Skip Holidays of</span>
+    <label class="hol-chk-label" style="font-size:11px;color:#6B7280;font-weight:400;">
+      <input type="checkbox" id="hol-select-all-header" checked onchange="toggleAllHolidays(this)">
+      <span class="hol-chk-box" style="width:13px;height:13px;"></span>
+      Select All
+    </label>
+  </div>
+</th>
               </tr>
             </thead>
             <tbody id="milestone-config-tbody"></tbody>
@@ -2873,16 +2882,9 @@ function renderMilestoneTable(type) {
     const uid = 'ms_' + i;
     const holCell = isSystem
       ? `<span style="color:#D1D5DB;font-size:13px;">—</span>`
-      : `<div>
-          <label class="hol-chk-label hol-select-all">
-            <input type="checkbox" id="${uid}_all" checked onchange="toggleHolAll('${uid}',this)">
-            <span class="hol-chk-box"></span>
-            <span style="font-size:11px;color:#6B7280;font-weight:600;">Select All</span>
-          </label>
-          <div class="hol-chk-group">${holRegions.map((r, ri) =>
-            `<label class="hol-chk-label"><input type="checkbox" id="${uid}_${ri}" name="${uid}" checked onchange="updateHolSelectAll('${uid}')"><span class="hol-chk-box"></span>${r.label}</label>`
-          ).join('')}</div>
-        </div>`;
+      : `<div class="hol-chk-group">${holRegions.map((r, ri) =>
+          `<label class="hol-chk-label"><input type="checkbox" id="${uid}_${ri}" name="hol-all" checked onchange="updateHolHeaderAll()"><span class="hol-chk-box"></span>${r.label}</label>`
+        ).join('')}</div>`;
     return `<tr style="${rowStyle}">
       <td style="color:#9CA3AF;font-size:12px;padding-left:20px;">${i + 1}</td>
       <td><span class="cal-chip" style="background:${m.bg};color:${m.color};">${m.label}</span></td>
@@ -2893,13 +2895,13 @@ function renderMilestoneTable(type) {
   }).join('');
 }
 
-function toggleHolAll(uid, masterChk) {
-  document.querySelectorAll(`input[name="${uid}"]`).forEach(c => { c.checked = masterChk.checked; });
+function toggleAllHolidays(masterChk) {
+  document.querySelectorAll('input[name="hol-all"]').forEach(c => { c.checked = masterChk.checked; });
 }
-function updateHolSelectAll(uid) {
-  const all = document.querySelectorAll(`input[name="${uid}"]`);
+function updateHolHeaderAll() {
+  const all = document.querySelectorAll('input[name="hol-all"]');
   const n = Array.from(all).filter(c => c.checked).length;
-  const master = document.getElementById(uid + '_all');
+  const master = document.getElementById('hol-select-all-header');
   if (!master) return;
   master.indeterminate = n > 0 && n < all.length;
   master.checked = n === all.length;
